@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+@layer utilities {
+
+    /* Particle animations */
+    .particle {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(60px);
+        opacity: 0.15;
+        animation: float 20s infinite;
+    }
+
+    .particle-1 {
+        width: 300px;
+        height: 300px;
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .particle-2 {
+        width: 400px;
+        height: 400px;
+        top: 50%;
+        right: 10%;
+        animation-delay: 7s;
+    }
+
+    .particle-3 {
+        width: 250px;
+        height: 250px;
+        bottom: 10%;
+        left: 50%;
+        animation-delay: 14s;
+    }
+
+    /* Slide down animation */
+    .animate-slideDown {
+        animation: slideDown 0.3s ease-out;
+    }
+
+    /* Stat card styles */
+    .stat-card {
+        @apply rounded-2xl p-6 transition-all duration-300;
+        @apply hover:scale-105 hover:shadow-2xl;
+    }
+
+    .stat-card-dark {
+        @apply bg-gray-800/50 backdrop-blur-xl border border-gray-700;
+    }
+
+    .stat-card-light {
+        @apply bg-white/80 backdrop-blur-xl border border-gray-200;
+    }
+
+    .stat-icon {
+        @apply w-12 h-12 rounded-xl flex items-center justify-center;
+        @apply transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6;
+    }
+
+    .goal-card {
+        @apply rounded-2xl p-5 transition-all duration-300;
+        @apply hover:scale-[1.02] opacity-0;
+        animation: slideIn 0.3s ease-out forwards;
+    }
+
+    .goal-card-dark {
+        @apply bg-gray-800/50 backdrop-blur-xl border border-gray-700;
+        @apply hover:bg-gray-800/70 hover:shadow-2xl hover:shadow-purple-500/10;
+    }
+
+    .goal-card-light {
+        @apply bg-white/80 backdrop-blur-xl border border-gray-200;
+        @apply hover:bg-white hover:shadow-2xl hover:shadow-gray-300/50;
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(50px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-30px, 30px) scale(0.9);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Dark mode support */
+.dark {
+    color-scheme: dark;
+}
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
