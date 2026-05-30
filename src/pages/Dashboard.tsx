@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import {
     Plus, Trash2, Check, Target, TrendingUp,
     Moon, Sun, Filter, CheckCircle2, Circle, X
@@ -21,9 +22,13 @@ const CATEGORIES = [
 ]
 
 const STORAGE_KEY = 'bucket-list-items'
-const THEME_KEY = 'bucket-list-theme'
 
-function App() {
+type DashboardProps = {
+    dark: boolean
+    setDark: Dispatch<SetStateAction<boolean>>
+}
+
+function Dashboard({ dark, setDark }: DashboardProps) {
     const [items, setItems] = useState<BucketItem[]>(() => {
         const saved = localStorage.getItem(STORAGE_KEY)
         return saved ? JSON.parse(saved) : []
@@ -33,23 +38,11 @@ function App() {
     const [selectedCategory, setSelectedCategory] = useState('Travel')
     const [filterCategory, setFilterCategory] = useState('All')
     const [showAddForm, setShowAddForm] = useState(false)
-    const [darkMode, setDarkMode] = useState(() => {
-        const saved = localStorage.getItem(THEME_KEY)
-        return saved ? JSON.parse(saved) : false
-    })
+    const darkMode = dark
 
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
     }, [items])
-
-    useEffect(() => {
-        localStorage.setItem(THEME_KEY, JSON.stringify(darkMode))
-        if (darkMode) {
-            document.documentElement.classList.add('dark')
-        } else {
-            document.documentElement.classList.remove('dark')
-        }
-    }, [darkMode])
 
     const addItem = () => {
         if (newItemTitle.trim() === '') return
@@ -86,16 +79,13 @@ function App() {
         : 0
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 ${darkMode
-            ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800'
-            : 'bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100'
-            }`}>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
 
             {/* Floating Particles Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className={`particle particle-1 ${darkMode ? 'bg-blue-500' : 'bg-blue-400'}`}></div>
-                <div className={`particle particle-2 ${darkMode ? 'bg-purple-500' : 'bg-purple-400'}`}></div>
-                <div className={`particle particle-3 ${darkMode ? 'bg-pink-500' : 'bg-pink-400'}`}></div>
+                <div className="particle particle-1 bg-blue-400 dark:bg-blue-500"></div>
+                <div className="particle particle-2 bg-purple-400 dark:bg-purple-500"></div>
+                <div className="particle particle-3 bg-pink-400 dark:bg-pink-500"></div>
             </div>
 
             <div className="relative max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -103,24 +93,19 @@ function App() {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-12">
                     <div>
-                        <h1 className={`text-4xl md:text-5xl font-bold mb-2 transition-colors ${darkMode ? 'text-white' : 'text-gray-900'
-                            }`}>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-2 transition-colors text-gray-900 dark:text-white">
                             Bucket List
                         </h1>
-                        <p className={`text-lg transition-colors ${darkMode ? 'text-gray-400' : 'text-gray-600'
-                            }`}>
+                        <p className="text-lg transition-colors text-gray-600 dark:text-slate-400">
                             Your goals, tracked and achieved
                         </p>
                     </div>
 
                     <button
-                        onClick={() => setDarkMode(!darkMode)}
-                        className={`p-3 rounded-xl transition-all duration-300 ${darkMode
-                            ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
-                            : 'bg-white text-gray-700 hover:bg-gray-100'
-                            } shadow-lg hover:shadow-xl transform hover:scale-105`}
+                        onClick={() => setDark(!dark)}
+                        className="p-3 rounded-xl bg-white text-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 dark:bg-slate-800 dark:text-yellow-400 dark:hover:bg-slate-700"
                     >
-                        {darkMode ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                        {dark ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
                     </button>
                 </div>
 
@@ -423,4 +408,4 @@ function App() {
     )
 }
 
-export default App
+export default Dashboard

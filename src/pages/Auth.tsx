@@ -111,7 +111,7 @@ export default function Auth() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 flex items-center justify-center p-4 transition-colors duration-300 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
 
             {/* Background Decoration */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -123,14 +123,14 @@ export default function Auth() {
                 {/* Back to Home */}
                 <Link
                     to="/"
-                    className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+                    className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors dark:text-slate-300 dark:hover:text-white"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Back to home
                 </Link>
 
                 {/* Auth Card */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden dark:bg-slate-900/80 dark:border-slate-700">
 
                     {/* Header */}
                     <div className="p-8 pb-6">
@@ -138,13 +138,13 @@ export default function Auth() {
                             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-teal-500 rounded-xl flex items-center justify-center">
                                 <Target className="w-7 h-7 text-white" />
                             </div>
-                            <span className="text-2xl font-bold text-gray-900">MYBUKO</span>
+                            <span className="text-2xl font-bold text-gray-900 dark:text-white">MYBUKO</span>
                         </div>
 
-                        <h2 className="text-3xl font-bold text-gray-900 text-center mb-2">
+                        <h2 className="text-3xl font-bold text-gray-900 text-center mb-2 dark:text-white">
                             {isLogin ? 'Welcome back' : 'Create account'}
                         </h2>
-                        <p className="text-gray-600 text-center">
+                        <p className="text-gray-600 text-center dark:text-slate-300">
                             {isLogin ? 'Sign in to continue your journey' : 'Start planning your bucket list today'}
                         </p>
                     </div>
@@ -155,7 +155,7 @@ export default function Auth() {
                         {/* Name field (signup only) */}
                         {!isLogin && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-slate-300">
                                     Full Name
                                 </label>
                                 <div className="relative">
@@ -166,7 +166,7 @@ export default function Auth() {
                                         value={formData.name}
                                         onChange={handleInputChange}
                                         placeholder="John Doe"
-                                        className={`w-full pl-11 pr-4 py-3 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${errors.name ? 'border-red-500' : 'border-gray-200'
+                                        className={`w-full pl-11 pr-4 py-3 bg-gray-50 text-slate-950 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all dark:bg-slate-800 dark:text-slate-100 ${errors.name ? 'border-red-500' : 'border-gray-200 dark:border-slate-700'
                                             }`}
                                     />
                                 </div>
@@ -178,7 +178,7 @@ export default function Auth() {
 
                         {/* Email field */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-slate-300">
                                 Email Address
                             </label>
                             <div className="relative">
@@ -189,7 +189,7 @@ export default function Auth() {
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     placeholder="you@example.com"
-                                    className={`w-full pl-11 pr-4 py-3 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${errors.email ? 'border-red-500' : 'border-gray-200'
+                                    className={`w-full pl-11 pr-4 py-3 bg-gray-50 text-slate-950 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all dark:bg-slate-800 dark:text-slate-100 ${errors.email ? 'border-red-500' : 'border-gray-200 dark:border-slate-700'
                                         }`}
                                 />
                             </div>
@@ -200,7 +200,7 @@ export default function Auth() {
 
                         {/* Password field */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-slate-300">
                                 Password
                             </label>
                             <div className="relative">
@@ -211,13 +211,13 @@ export default function Auth() {
                                     value={formData.password}
                                     onChange={handleInputChange}
                                     placeholder="••••••••"
-                                    className={`w-full pl-11 pr-11 py-3 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${errors.password ? 'border-red-500' : 'border-gray-200'
+                                    className={`w-full pl-11 pr-11 py-3 bg-gray-50 text-slate-950 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all dark:bg-slate-800 dark:text-slate-100 ${errors.password ? 'border-red-500' : 'border-gray-200 dark:border-slate-700'
                                         }`}
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors dark:text-slate-300 dark:hover:text-slate-100"
                                 >
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
@@ -230,18 +230,18 @@ export default function Auth() {
                         {/* Confirm Password field (signup only) */}
                         {!isLogin && (
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-slate-300">
                                     Confirm Password
                                 </label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-slate-400" />
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         name="confirmPassword"
                                         value={formData.confirmPassword}
                                         onChange={handleInputChange}
                                         placeholder="••••••••"
-                                        className={`w-full pl-11 pr-4 py-3 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                                        className={`w-full pl-11 pr-4 py-3 bg-gray-50 text-slate-950 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all dark:bg-slate-800 dark:text-slate-100 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-200 dark:border-slate-700'
                                             }`}
                                     />
                                 </div>
@@ -256,7 +256,7 @@ export default function Auth() {
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                    className="text-sm text-blue-600 hover:text-blue-700 font-medium dark:text-blue-400 dark:hover:text-blue-300"
                                 >
                                     Forgot password?
                                 </button>
@@ -282,10 +282,10 @@ export default function Auth() {
                         {/* Divider */}
                         <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-300"></div>
+                                <div className="w-full border-t border-gray-300 dark:border-slate-700"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-4 bg-white text-gray-500">Or continue with</span>
+                                <span className="px-4 bg-white text-gray-500 dark:bg-slate-900 dark:text-slate-300">Or continue with</span>
                             </div>
                         </div>
 
@@ -301,7 +301,7 @@ export default function Auth() {
                                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                                 </svg>
-                                <span className="text-sm font-medium text-gray-700">Google</span>
+                                <span className="text-sm font-medium text-gray-700 dark:text-slate-200">Google</span>
                             </button>
 
                             <button
@@ -311,18 +311,18 @@ export default function Auth() {
                                 <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
                                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                                 </svg>
-                                <span className="text-sm font-medium text-gray-700">Facebook</span>
+                                <span className="text-sm font-medium text-gray-700 dark:text-slate-200">Facebook</span>
                             </button>
                         </div>
                     </form>
 
                     {/* Switch Mode */}
-                    <div className="px-8 py-6 bg-gray-50 text-center">
-                        <p className="text-gray-600">
+                    <div className="px-8 py-6 bg-gray-50 text-center dark:bg-slate-900 dark:text-slate-300">
+                        <p className="text-gray-600 dark:text-slate-300">
                             {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
                             <button
                                 onClick={switchMode}
-                                className="text-blue-600 hover:text-blue-700 font-semibold"
+                                className="text-blue-600 hover:text-blue-700 font-semibold dark:text-blue-400 dark:hover:text-blue-300"
                             >
                                 {isLogin ? 'Sign up' : 'Sign in'}
                             </button>
@@ -332,7 +332,7 @@ export default function Auth() {
 
                 {/* Trust Indicators */}
                 <div className="mt-8 text-center">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-slate-400">
                         Trusted by 2,500+ dreamers worldwide
                     </p>
                 </div>
