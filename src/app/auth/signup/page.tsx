@@ -50,10 +50,14 @@ export default function SignupPage() {
       const data = await res.json()
 
       if (res.ok) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        router.push('/dashboard')
-      } else {
+  localStorage.setItem('token', data.token)
+  localStorage.setItem('user', JSON.stringify(data.user))
+  
+  // Set cookie
+  document.cookie = `token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}`
+  
+  router.push('/dashboard')
+} else {
         setErrors({ email: data.error || 'Signup failed' })
       }
     } catch (error) {
@@ -106,7 +110,7 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-4">
+          <form onSubmit={handleSubmit} autoComplete="off" className="px-8 pb-8 space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name
@@ -116,6 +120,7 @@ export default function SignupPage() {
                 <input
                   type="text"
                   name="name"
+                  autoComplete="name"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="John Doe"
@@ -136,6 +141,7 @@ export default function SignupPage() {
                 <input
                   type="email"
                   name="email"
+                  autoComplete="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="you@example.com"
@@ -156,6 +162,7 @@ export default function SignupPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
+                  autoComplete="new-password"
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••"
@@ -183,6 +190,7 @@ export default function SignupPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="confirmPassword"
+                  autoComplete="new-password"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="••••••••"

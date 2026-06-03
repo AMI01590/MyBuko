@@ -30,7 +30,7 @@ export default function SettingsPage() {
     <div className={`min-h-screen ${isDark ? 'bg-slate-900 text-slate-200' : 'bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 text-gray-900'} p-8`}>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Link href="/profile" className={`inline-flex items-center gap-2 ${isDark ? 'text-slate-200' : 'text-blue-600 hover:text-blue-700'} mb-4`}>
+          <Link href="/dashboard/profile" className={`inline-flex items-center gap-2 ${isDark ? 'text-slate-200' : 'text-blue-600 hover:text-blue-700'} mb-4`}>
             <ArrowLeft className="w-4 h-4" />
             Back to Profile
           </Link>

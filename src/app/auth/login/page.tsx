@@ -28,10 +28,14 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (res.ok) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        router.push('/dashboard')
-      } else {
+  localStorage.setItem('token', data.token)
+  localStorage.setItem('user', JSON.stringify(data.user))
+  
+  // Set cookie
+  document.cookie = `token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}`
+  
+  router.push('/dashboard')
+}else {
         setErrors({ email: data.error || 'Login failed' })
       }
     } catch (error) {
@@ -84,7 +88,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-5">
+          <form onSubmit={handleSubmit} autoComplete="off" className="px-8 pb-8 space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
@@ -94,6 +98,7 @@ export default function LoginPage() {
                 <input
                   type="email"
                   name="email"
+                  autoComplete="username"
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="you@example.com"
@@ -116,6 +121,7 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
+                  autoComplete="current-password"
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="••••••••"

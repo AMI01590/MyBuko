@@ -51,8 +51,9 @@ export default function AddGoalPage() {
       })
 
       if (res.ok) {
-        const goal = await res.json()
-        router.push(`/goal/${goal.id}`)
+        // After creating a goal, return to dashboard list
+        await res.json()
+        router.push('/dashboard')
       } else {
         alert('Failed to create goal')
       }

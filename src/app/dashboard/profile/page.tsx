@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { User, Calendar, Target, Award, TrendingUp, Settings } from 'lucide-react'
 import { useTheme } from '../../theme-provider'
+import { useRouter } from 'next/navigation'
 
 export default function ProfilePage() {
   const { theme } = useTheme()
+  const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [stats, setStats] = useState({
     totalGoals: 0,
@@ -16,35 +18,68 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const userData = localStorage.getItem('user')
-      let currentUser = null
+    if (typeof window === 'undefined') return
 
-      if (userData) {
-        currentUser = JSON.parse(userData)
-      } else {
-        currentUser = {
-          name: 'Jane Doe',
-          email: 'jane.doe@example.com',
-          createdAt: new Date().toISOString(),
-          bio: 'Welcome to your profile! Add a bio and start planning your goals.'
-        }
-        localStorage.setItem('user', JSON.stringify(currentUser))
-      }
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
 
-      setUser(currentUser)
-      setStats({
-        totalGoals: 12,
-        completedGoals: 5,
-        inProgressGoals: 7,
-        completionRate: 42
-      })
+    if (!token || !userData) {
+      router.push('/auth/login')
+      return
     }
-  }, [])
+
+    setUser(JSON.parse(userData))
+
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/goals', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (res.status === 401) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          router.push('/auth/login')
+          return
+        }
+
+        if (!res.ok) {
+          console.error('Failed to fetch goals for profile stats')
+          return
+        }
+
+        const goals = await res.json()
+        const totalGoals = goals.length
+        const completedGoals = goals.filter((goal: any) => goal.status === 'Completed').length
+        const inProgressGoals = goals.filter((goal: any) => goal.status === 'In Progress').length
+        const completionRate = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0
+
+        setStats({
+          totalGoals,
+          completedGoals,
+          inProgressGoals,
+          completionRate
+        })
+      } catch (error) {
+        console.error('Error fetching profile stats:', error)
+      }
+    }
+
+    fetchStats()
+  }, [router])
 
   if (!user) return <div className="flex items-center justify-center min-h-screen">Loading...</div>
 
   const isDark = theme === 'dark'
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    document.cookie = 'token=; path=/; max-age=0'
+    router.push('/')
+  }
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-slate-900 text-slate-200' : 'bg-gradient-to-br from-gray-50 via-slate-50 to-gray-100 text-gray-900'} p-8`}>
@@ -52,8 +87,16 @@ export default function ProfilePage() {
         
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className={`text-4xl font-bold ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>Profile</h1>
-          <Link href="/settings" className={`${isDark ? 'p-3 bg-slate-800/60' : 'p-3 bg-white'} rounded-xl shadow hover:shadow-lg transition-all`}>
+          <div className="flex items-center gap-4">
+            <h1 className={`text-4xl font-bold ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>Profile</h1>
+            <button
+              onClick={handleLogout}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${isDark ? 'bg-slate-700 text-slate-100 hover:bg-slate-600' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
+            >
+              Logout
+            </button>
+          </div>
+          <Link href="/dashboard/settings" className={`${isDark ? 'p-3 bg-slate-800/60' : 'p-3 bg-white'} rounded-xl shadow hover:shadow-lg transition-all`}>
             <Settings className={`w-6 h-6 ${isDark ? 'text-slate-300' : 'text-gray-600'}`} />
           </Link>
         </div>
