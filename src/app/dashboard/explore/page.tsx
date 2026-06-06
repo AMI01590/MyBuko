@@ -31,6 +31,9 @@ export default function ExplorePage() {
 
       if (res.ok) {
         const data = await res.json()
+
+        console.log('Explore goals data:', data)
+
         setGoals(data)
       }
     } catch (error) {
