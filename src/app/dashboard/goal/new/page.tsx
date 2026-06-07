@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Sparkles } from 'lucide-react'
+import { ArrowLeft, Sparkles } from 'lucide-react'
 import { useTheme } from '../../../theme-provider'
 
 const CATEGORIES = [
@@ -27,7 +27,8 @@ export default function AddGoalPage() {
     priority: 'Medium',
     difficulty: 'Medium',
     location: '',
-    tags: ''
+    tags: '',
+    visibility: 'Private'
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -155,7 +156,7 @@ export default function AddGoalPage() {
                 value={formData.budget}
                 onChange={handleInputChange}
                 placeholder="e.g., 200000"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                className={`w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark ? 'bg-slate-700/60 text-slate-200' : 'bg-gray-50 text-black'}`}
               />
             </div>
           </div>
@@ -214,6 +215,37 @@ export default function AddGoalPage() {
                 className={`w-full px-4 py-3 ${isDark ? 'bg-slate-700/60' : 'bg-gray-50'} border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark ? 'text-slate-200' : 'text-black'}`}
               />
             </div>
+          </div>
+
+          <div className={`space-y-3 rounded-2xl border p-5 ${isDark ? 'border-slate-700 bg-slate-800/80' : 'border-gray-200 bg-gray-50/80'}`}>
+            <p className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>Make Public?</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className={`cursor-pointer rounded-2xl border p-4 transition ${formData.visibility === 'Private' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-100 shadow-inner' : isDark ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-100'}`}>
+                <input
+                  type="radio"
+                  name="visibility"
+                  value="Private"
+                  checked={formData.visibility === 'Private'}
+                  onChange={handleInputChange}
+                  className="mr-3"
+                />
+                <span className="font-medium">Private</span>
+                <div className={`${isDark ? 'text-slate-400' : 'text-gray-500'} text-xs`}>Only me</div>
+              </label>
+              <label className={`cursor-pointer rounded-2xl border p-4 transition ${formData.visibility === 'Public' ? 'border-blue-500 bg-blue-500/10 text-blue-100 shadow-inner' : isDark ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-100'}`}>
+                <input
+                  type="radio"
+                  name="visibility"
+                  value="Public"
+                  checked={formData.visibility === 'Public'}
+                  onChange={handleInputChange}
+                  className="mr-3"
+                />
+                <span className="font-medium">Public</span>
+                <div className={`${isDark ? 'text-slate-400' : 'text-gray-500'} text-xs`}>Everyone can see</div>
+              </label>
+            </div>
+            <p className={`${isDark ? 'text-slate-400' : 'text-gray-500'} text-xs`}>Public goals appear in Explore</p>
           </div>
 
           {/* Buttons */}
