@@ -318,7 +318,7 @@ export default function DashboardPage() {
             Add New Goal
           </Link>
           <Link
-            href="/dashboard/explore"
+            href="/explore"
             className={`flex-1 inline-flex items-center justify-center gap-2 rounded-full px-8 py-5 font-semibold tracking-wide transition ${isDark ? 'bg-slate-800 text-slate-100 border border-slate-700 hover:bg-slate-700' : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50'}`}
           >
             Explore

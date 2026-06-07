@@ -2,6 +2,7 @@
 
 import type { ChangeEvent, FormEvent } from 'react'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { ImagePlus, Heart, Send, Camera, TrendingUp, Trophy, Users } from 'lucide-react'
 
 type Comment = {
@@ -28,6 +29,23 @@ type TrendingGoal = {
   id: string
   title: string
   subtitle: string
+}
+
+type PublicGoal = {
+  id: string
+  title: string
+  description?: string
+  category?: string
+  budget?: number | null
+  priority?: string
+  difficulty?: string
+  status?: string
+  progress?: number
+  createdAt: string
+  user?: {
+    name: string
+    email: string
+  }
 }
 
 const STORAGE_KEY = 'mybuko-explore-posts'
@@ -104,6 +122,7 @@ export default function ExploreFeed() {
   const [author, setAuthor] = useState('')
   const [currentUserName, setCurrentUserName] = useState('')
   const [currentUserEmail, setCurrentUserEmail] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [text, setText] = useState('')
   const [image, setImage] = useState('')
   const [imageName, setImageName] = useState('')
@@ -114,9 +133,31 @@ export default function ExploreFeed() {
   const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({})
   const [activeCommentPost, setActiveCommentPost] = useState<number | null>(null)
   const [following, setFollowing] = useState<Record<string, boolean>>({})
+  const [publicGoals, setPublicGoals] = useState<PublicGoal[]>([])
+  const [publicGoalsLoading, setPublicGoalsLoading] = useState(true)
+  const [publicGoalsError, setPublicGoalsError] = useState('')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    const fetchPublicGoals = async () => {
+      setPublicGoalsLoading(true)
+      setPublicGoalsError('')
+
+      try {
+        const response = await fetch('/api/goals/explore')
+        if (!response.ok) throw new Error('Failed to load public goals')
+
+        const goals = (await response.json()) as PublicGoal[]
+        setPublicGoals(goals)
+      } catch (error) {
+        setPublicGoalsError('Unable to load public goals right now.')
+      } finally {
+        setPublicGoalsLoading(false)
+      }
+    }
+
+    fetchPublicGoals()
 
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY)
@@ -147,16 +188,17 @@ export default function ExploreFeed() {
     }
     try {
       const storedUser = window.localStorage.getItem('user')
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser)
-        if (parsedUser?.name) {
-          setAuthor(parsedUser.name)
-          setCurrentUserName(parsedUser.name)
-        }
-        if (parsedUser?.email) {
-          setCurrentUserEmail(parsedUser.email)
-        }
+      const storedToken = window.localStorage.getItem('token')
+      const parsedUser = storedUser ? JSON.parse(storedUser) : null
+
+      if (parsedUser?.name) {
+        setAuthor(parsedUser.name)
+        setCurrentUserName(parsedUser.name)
       }
+      if (parsedUser?.email) {
+        setCurrentUserEmail(parsedUser.email)
+      }
+      setIsLoggedIn(Boolean(parsedUser && storedToken))
     } catch {
       // ignore user load errors
     }
@@ -186,7 +228,7 @@ export default function ExploreFeed() {
     }
   }, [posts])
 
-  const canSubmit = author.trim().length > 0 && text.trim().length > 0
+  const canSubmit = isLoggedIn && author.trim().length > 0 && text.trim().length > 0
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -275,6 +317,7 @@ export default function ExploreFeed() {
     try {
       const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null
       const currentUser = storedUser ? JSON.parse(storedUser) : null
+      if (!currentUser) return
 
       const joinedKey = 'mybuko-joined-goals'
       const existing = typeof window !== 'undefined' ? localStorage.getItem(joinedKey) : null
@@ -378,6 +421,21 @@ export default function ExploreFeed() {
                 </div>
               </div>
 
+              {!isLoggedIn && (
+                <div className="rounded-3xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 mb-4">
+                  <p className="font-semibold">Login or sign up to unlock the full Explore community.</p>
+                  <p className="mt-2 text-slate-600 dark:text-rose-800">Posting stories, joining trending goals, and sharing your progress are available only after logging in.</p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Link href="/auth/login" className="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
+                      Login
+                    </Link>
+                    <Link href="/auth/signup" className="rounded-full border border-rose-600 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-600 hover:text-white">
+                      Sign up
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -385,14 +443,15 @@ export default function ExploreFeed() {
                     <input
                       value={author}
                       onChange={(e) => setAuthor(e.target.value)}
-                      placeholder="Ananya"
-                      className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 dark:border-emerald-500/30 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+                      placeholder={isLoggedIn ? 'Ananya' : 'Login to unlock posting'}
+                      disabled={!isLoggedIn}
+                      className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 dark:border-emerald-500/30 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500 disabled:cursor-not-allowed disabled:opacity-60"
                     />
                   </label>
                   <label className="space-y-3 text-sm font-medium text-slate-700 dark:text-slate-300">
                     Add a photo (optional)
                     <div className="flex flex-wrap items-center gap-3">
-                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-emerald-300 bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-200 dark:border-emerald-500/40 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400" htmlFor="explore-image-upload">
+                      <label className={`inline-flex items-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold shadow-lg transition focus:outline-none focus:ring-4 focus:ring-emerald-200 ${isLoggedIn ? 'cursor-pointer border-emerald-300 bg-emerald-600 text-white shadow-emerald-500/20 hover:-translate-y-0.5 hover:bg-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400' : 'cursor-not-allowed border-emerald-200 bg-emerald-100 text-slate-500 opacity-60'}`}>
                         <ImagePlus className="w-4 h-4" />
                         Choose photo
                       </label>
@@ -403,6 +462,7 @@ export default function ExploreFeed() {
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}
+                      disabled={!isLoggedIn}
                       className="sr-only"
                     />
                   </label>
@@ -414,8 +474,9 @@ export default function ExploreFeed() {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     rows={5}
-                    placeholder="Tell us how MyBuko helped you plan something special..."
-                    className="w-full rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 dark:border-emerald-500/30 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500"
+                    placeholder={isLoggedIn ? 'Tell us how MyBuko helped you plan something special...' : 'Login to unlock story posting'}
+                    disabled={!isLoggedIn}
+                    className="w-full rounded-3xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-slate-900 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 dark:border-emerald-500/30 dark:bg-slate-900 dark:text-slate-100 dark:placeholder-slate-500 disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </label>
 
@@ -424,7 +485,7 @@ export default function ExploreFeed() {
                   <button
                     type="submit"
                     disabled={!canSubmit}
-                    className="inline-flex items-center justify-center gap-2 rounded-3xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`inline-flex items-center justify-center gap-2 rounded-3xl px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition disabled:cursor-not-allowed disabled:opacity-60 ${canSubmit ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400'}`}
                   >
                     <Send className="w-4 h-4" />
                     Share Post
@@ -478,10 +539,14 @@ export default function ExploreFeed() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setText(`I am working on ${activeTrendingGoal.title}! ${activeTrendingGoal.subtitle}`)}
-                    className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow hover:bg-emerald-800 transition"
+                    onClick={() => {
+                      if (!isLoggedIn) return
+                      setText(`I am working on ${activeTrendingGoal.title}! ${activeTrendingGoal.subtitle}`)
+                    }}
+                    disabled={!isLoggedIn}
+                    className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow transition ${isLoggedIn ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-slate-400 cursor-not-allowed'}`}
                   >
-                    Start this trend
+                    {isLoggedIn ? 'Start this trend' : 'Login to unlock'}
                   </button>
                 </div>
               </div>
@@ -510,9 +575,10 @@ export default function ExploreFeed() {
             <button
               type="button"
               onClick={() => joinGoal({ title: 'Build a Daily Study Habit', description: 'Develop consistency by studying for at least 30 minutes every day.', category: 'Personal' })}
-              className="mt-5 inline-flex w-full sm:w-auto items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+              disabled={!isLoggedIn}
+              className={`mt-5 inline-flex w-full sm:w-auto items-center justify-center rounded-full px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition ${isLoggedIn ? 'bg-slate-950 hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100' : 'bg-slate-400 cursor-not-allowed'}`}
             >
-              {goalJoined ? 'Joined' : 'Join Goal'}
+              {goalJoined ? 'Joined' : isLoggedIn ? 'Join Goal' : 'Login to unlock'}
             </button>
             {goalJoined && (
               <p className="mt-4 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-100">
@@ -520,6 +586,61 @@ export default function ExploreFeed() {
               </p>
             )}
           </div>
+        </div>
+
+        <div className="mt-10">
+          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400 font-semibold">Public Goals</p>
+              <h3 className="mt-3 text-3xl font-bold text-slate-900 dark:text-white">Goals shared by the community</h3>
+            </div>
+            {publicGoalsLoading ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400">Loading public goals…</p>
+            ) : null}
+          </div>
+          {publicGoalsError ? (
+            <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-rose-700 dark:border-rose-500/30 dark:bg-rose-950/60 dark:text-rose-100">
+              {publicGoalsError}
+            </div>
+          ) : publicGoals.length === 0 && !publicGoalsLoading ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              No public goals are visible yet. Create a goal and mark it public to appear in Explore.
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {publicGoals.map((goal) => (
+                <article
+                  key={goal.id}
+                  className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 dark:border-slate-700 dark:bg-slate-900"
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs uppercase tracking-[0.24em] text-emerald-700 font-semibold">Public Goal</p>
+                      <h4 className="mt-3 text-xl font-semibold text-slate-900 dark:text-white truncate">{goal.title}</h4>
+                    </div>
+                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-100">
+                      {goal.category || 'General'}
+                    </span>
+                  </div>
+                  <p className="mt-4 text-slate-600 dark:text-slate-300 min-h-[3rem]">{goal.description || 'No description provided.'}</p>
+                  <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
+                    <span>{goal.status || 'Not Started'}</span>
+                    <span>Progress: {goal.progress ?? 0}%</span>
+                    {goal.budget != null && <span>Budget ₹{goal.budget.toLocaleString()}</span>}
+                    <span>By {goal.user?.name || 'Community'}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => joinGoal({ title: goal.title, description: goal.description, category: goal.category })}
+                    disabled={!isLoggedIn}
+                    className={`mt-6 inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-white transition ${isLoggedIn ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-slate-400 cursor-not-allowed'}`}
+                  >
+                    {isLoggedIn ? 'Join Goal' : 'Login to join'}
+                  </button>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-10">

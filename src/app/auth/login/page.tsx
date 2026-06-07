@@ -72,7 +72,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center p-4 dark:from-slate-950 dark:to-slate-900">
       <div className="w-full max-w-md">
         
         {/* Logo */}
@@ -85,37 +85,37 @@ export default function LoginPage() {
               MYBUKO
             </span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Login to your bucket list</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 dark:text-white">Welcome Back</h1>
+          <p className="text-gray-600 dark:text-slate-300">Login to your bucket list</p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 space-y-4 dark:bg-slate-900">
           
           {/* Error Message */}
           {error && (
-            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg flex items-start gap-3">
+            <div className="p-4 bg-red-50 border-2 border-red-200 rounded-lg flex items-start gap-3 dark:bg-rose-950/80 dark:border-rose-600">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-sm text-red-700 dark:text-red-200">{error}</p>
             </div>
           )}
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-slate-300">Email Address</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
               placeholder="you@example.com"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2 dark:text-slate-300">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -123,12 +123,12 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-slate-400"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -145,9 +145,9 @@ export default function LoginPage() {
           </button>
 
           {/* Signup Link */}
-          <p className="text-center text-gray-600">
+          <p className="text-center text-gray-600 dark:text-slate-300">
             Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link href="/auth/signup" className="text-blue-600 hover:text-blue-700 font-semibold dark:text-sky-400 dark:hover:text-sky-300">
               Sign up
             </Link>
           </p>
