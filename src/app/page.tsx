@@ -29,9 +29,7 @@ export default function LandingPage() {
 
                         {/* Nav Links */}
                         <div className="hidden md:flex items-center gap-4">
-                            <Link href="/explore" className="text-gray-600 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:text-white">
-                                Explore
-                            </Link>
+                            {/* Removed duplicate Explore link - keep Explore Community CTA only */}
                             <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:text-white">
                                 How it Works
                             </a>

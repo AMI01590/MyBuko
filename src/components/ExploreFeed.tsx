@@ -162,11 +162,33 @@ export default function ExploreFeed() {
     }
   }, [])
 
-  function toggleFollow(author: string) {
-    setFollowing((prev) => {
-      const next = { ...prev, [author]: !prev[author] }
-      return next
-    })
+  async function toggleFollow(post: Post) {
+    const author = post.author
+    // optimistic UI
+    setFollowing((prev) => ({ ...prev, [author]: !prev[author] }))
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+      // If we have an author email and a token, try server-side follow
+      if (token && post.authorEmail) {
+        // lookup user id by email
+        const lookup = await fetch(`/api/users/by-email?email=${encodeURIComponent(post.authorEmail)}`)
+        if (lookup.ok) {
+          const data = await lookup.json()
+          const targetId = data.id
+          const isNowFollowing = !following[author]
+          if (isNowFollowing) {
+            await fetch('/api/follow', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ followingId: targetId }) })
+          } else {
+            await fetch(`/api/follow?followingId=${encodeURIComponent(targetId)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+          }
+          return
+        }
+      }
+    } catch (err) {
+      // ignore server errors and keep local state
+      console.error('Follow API error', err)
+    }
   }
 
   useEffect(() => {

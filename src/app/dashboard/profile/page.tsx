@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { User, Award, CheckCircle, Pencil, Check, X } from 'lucide-react'
 import { useTheme } from '../../theme-provider'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 function formatJoinedDate(dateValue: string | undefined) {
   if (!dateValue) return 'Unknown date'
@@ -37,6 +38,8 @@ export default function ProfilePage() {
   const [isBioEditing, setIsBioEditing] = useState(false)
   const [profilePicture, setProfilePicture] = useState<string>('')
   const [activityPosts, setActivityPosts] = useState<ExploreActivityPost[]>([])
+  const [followers, setFollowers] = useState<any[]>([])
+  const [followingList, setFollowingList] = useState<any[]>([])
   const [saveMessage, setSaveMessage] = useState('')
   const hiddenFileInputRef = useRef<HTMLInputElement | null>(null)
 
@@ -94,7 +97,26 @@ export default function ProfilePage() {
       }
     }
 
+    const fetchFollows = async () => {
+      try {
+        const resF = await fetch(`/api/users/${parsedUser.id}/followers`)
+        if (resF.ok) {
+          const data = await resF.json()
+          setFollowers(data.followers || [])
+        }
+
+        const resG = await fetch(`/api/users/${parsedUser.id}/following`)
+        if (resG.ok) {
+          const data = await resG.json()
+          setFollowingList(data.following || [])
+        }
+      } catch (err) {
+        console.error('Failed to fetch followers/following', err)
+      }
+    }
+
     fetchStats()
+    fetchFollows()
   }, [router])
 
   useEffect(() => {
@@ -287,6 +309,37 @@ export default function ProfilePage() {
               <div className={`${isDark ? 'bg-slate-800/60' : 'bg-white'} rounded-3xl shadow-xl p-6`}>
                 <p className={`${isDark ? 'text-slate-300' : 'text-sm text-gray-600'} mb-1`}>Completion Rate</p>
                 <p className="text-3xl font-bold text-purple-600">{stats.completionRate}%</p>
+              </div>
+            </div>
+
+            <div className={`${isDark ? 'bg-slate-800/60' : 'bg-white'} rounded-3xl shadow-xl p-6 mt-4`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>Social</h3>
+                <div className="text-sm text-slate-400">Followers & Following</div>
+              </div>
+
+              <div className="flex items-center gap-6">
+                <Link href="/dashboard/profile/followers" className="group">
+                  <div>
+                    <p className={`text-2xl font-bold group-hover:underline ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>{followers.length}</p>
+                    <p className={`${isDark ? 'text-slate-300' : 'text-gray-600'} text-sm`}>Followers</p>
+                  </div>
+                </Link>
+
+                <Link href="/dashboard/profile/following" className="group">
+                  <div>
+                    <p className={`text-2xl font-bold group-hover:underline ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>{followingList.length}</p>
+                    <p className={`${isDark ? 'text-slate-300' : 'text-gray-600'} text-sm`}>Following</p>
+                  </div>
+                </Link>
+
+                <div className="ml-auto flex items-center gap-2">
+                  {followers.slice(0,5).map((f) => (
+                    <div key={f.id} className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-semibold dark:bg-slate-700">
+                      {f.name.split(' ').map((s:string)=>s[0]).join('').slice(0,2)}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
