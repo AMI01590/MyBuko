@@ -4,7 +4,7 @@ import type { ChangeEvent, FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ImagePlus, Heart, Send, Camera, TrendingUp, Trophy, Users } from 'lucide-react'
+import { ImagePlus, Heart, Send, Camera, TrendingUp, Trophy, Users, MessageSquare } from 'lucide-react'
 
 type Comment = {
   id: number
@@ -122,9 +122,14 @@ export default function ExploreFeed() {
   const router = useRouter()
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [author, setAuthor] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
+  const [hasLoadedPosts, setHasLoadedPosts] = useState(false)
 
   const handleUserClick = async (email: string | undefined) => {
-    if (!email) return
+    if (!email) {
+      alert("This is a seed post template. You can view profiles and start chats with registered members who post on the feed!")
+      return
+    }
     try {
       const res = await fetch(`/api/users/by-email?email=${encodeURIComponent(email)}`)
       if (res.ok) {
@@ -133,6 +138,45 @@ export default function ExploreFeed() {
       }
     } catch (err) {
       console.error('User profile redirect failed:', err)
+    }
+  }
+
+  const handleMessageClick = async (email: string | undefined) => {
+    if (!email) return
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push('/auth/login')
+      return
+    }
+
+    try {
+      const userRes = await fetch(`/api/users/by-email?email=${encodeURIComponent(email)}`)
+      if (!userRes.ok) {
+        alert('Could not find user details.')
+        return
+      }
+      const userData = await userRes.json()
+      
+      const chatRes = await fetch('/api/chats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ participantId: userData.id }),
+      })
+
+      if (chatRes.ok) {
+        const chatData = await chatRes.json()
+        router.push(`/dashboard/chats/${chatData.chat.id}`)
+      } else if (chatRes.status === 403) {
+        alert('Chatting is only allowed between mutual followers. Make sure you follow each other!')
+      } else {
+        alert('Unable to start a conversation with this user.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Error initiating chat room.')
     }
   }
   const [currentUserName, setCurrentUserName] = useState('')
@@ -154,7 +198,30 @@ export default function ExploreFeed() {
   const [publicGoalsError, setPublicGoalsError] = useState('')
 
   useEffect(() => {
+    setIsMounted(true)
     if (typeof window === 'undefined') return
+
+    // Load posts from local storage on client side after mounting
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored) as Post[]
+        const cleaned = parsed
+          .map((post) => ({
+            ...post,
+            comments: post.comments ?? [],
+            liked: post.liked ?? false,
+          }))
+          .filter((post) => {
+            return !(
+              (post.author === 'Meera' && post.text.includes('The experience feed feels so lively')) ||
+              post.author === 'Vikram'
+            )
+          })
+        setPosts(cleaned)
+      }
+    } catch {}
+    setHasLoadedPosts(true)
 
     const fetchPublicGoals = async () => {
       setPublicGoalsLoading(true)
@@ -175,27 +242,6 @@ export default function ExploreFeed() {
 
     fetchPublicGoals()
 
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored) as Post[]
-        const cleaned = parsed
-          .map((post) => ({
-            ...post,
-            comments: post.comments ?? [],
-            liked: post.liked ?? false,
-          }))
-          .filter((post) => {
-            return !(
-              (post.author === 'Meera' && post.text.includes('The experience feed feels so lively')) ||
-              post.author === 'Vikram'
-            )
-          })
-        setPosts(cleaned)
-      }
-    } catch {
-      // ignore local storage read errors
-    }
     const storedFollowing = window.localStorage.getItem(FOLLOWING_KEY)
     if (storedFollowing) {
       try {
@@ -288,13 +334,14 @@ export default function ExploreFeed() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+    if (!hasLoadedPosts) return
 
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(posts))
     } catch {
       // ignore local storage write errors
     }
-  }, [posts])
+  }, [posts, hasLoadedPosts])
 
   const canSubmit = isLoggedIn && author.trim().length > 0 && text.trim().length > 0
 
@@ -320,7 +367,7 @@ export default function ExploreFeed() {
     }
 
     setPosts((currentPosts) => [newPost, ...currentPosts])
-    setAuthor('')
+    setAuthor(currentUserName)
     setText('')
     setImage('')
     setImageName('')
@@ -419,10 +466,7 @@ export default function ExploreFeed() {
     }
   }
 
-  const visiblePosts = posts.filter((post) => {
-    if (!currentUserName && !currentUserEmail) return true
-    return post.authorEmail !== currentUserEmail && post.author !== currentUserName
-  })
+  const visiblePosts = posts
 
   const handleCommentChange = (postId: number, value: string) => {
     setCommentDrafts((drafts) => ({ ...drafts, [postId]: value }))
@@ -602,10 +646,10 @@ export default function ExploreFeed() {
                       setJoinedTrends(prev => [...prev, activeTrendingGoal.id])
                       setText(`I am working on ${activeTrendingGoal.title}! ${activeTrendingGoal.subtitle}`)
                     }}
-                    disabled={!isLoggedIn}
-                    className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow transition ${isLoggedIn ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-slate-400 cursor-not-allowed'}`}
+                    disabled={!isMounted ? true : !isLoggedIn}
+                    className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow transition ${(!isMounted || !isLoggedIn) ? 'bg-slate-400 cursor-not-allowed' : 'bg-emerald-700 hover:bg-emerald-800'}`}
                   >
-                    {isTrendingGoalJoined ? 'Started ✓' : isLoggedIn ? 'Start this trend' : 'Login to unlock'}
+                    {!isMounted ? 'Login to unlock' : isTrendingGoalJoined ? 'Started ✓' : isLoggedIn ? 'Start this trend' : 'Login to unlock'}
                   </button>
                 </div>
               </div>
@@ -741,13 +785,25 @@ export default function ExploreFeed() {
                         <p className="truncate text-sm text-slate-500 dark:text-slate-400">{post.role} • {post.date}</p>
                       </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleFollow(post)}
-                      className={`inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition ${following[post.authorEmail || ''] || following[post.author] ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700'}`}
-                    >
-                      {following[post.authorEmail || ''] || following[post.author] ? 'Following' : 'Follow'}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {post.authorEmail && post.authorEmail !== currentUserEmail && (
+                        <button
+                          type="button"
+                          onClick={() => handleMessageClick(post.authorEmail)}
+                          className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-700 hover:border-slate-350 hover:bg-slate-50 transition dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-750"
+                          title="Send Message"
+                        >
+                          <MessageSquare className="w-4 h-4 text-blue-500" />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => toggleFollow(post)}
+                        className={`inline-flex items-center justify-center rounded-full border px-4 py-2 text-sm font-semibold transition ${following[post.authorEmail || ''] || following[post.author] ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700'}`}
+                      >
+                        {following[post.authorEmail || ''] || following[post.author] ? 'Following' : 'Follow'}
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-4">
                     <p className="text-slate-700 leading-relaxed dark:text-slate-300">{post.text}</p>

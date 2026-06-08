@@ -15,7 +15,8 @@ export default function LandingPage() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [user, setUser] = useState<any>(null)
     const [showDropdown, setShowDropdown] = useState(false)
-    const dropdownRef = useRef<HTMLDivElement | null>(null)
+    const desktopDropdownRef = useRef<HTMLDivElement | null>(null)
+    const mobileDropdownRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
         if (typeof window === 'undefined') return
@@ -40,7 +41,10 @@ export default function LandingPage() {
 
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            const clickedOutsideDesktop = !desktopDropdownRef.current || !desktopDropdownRef.current.contains(event.target as Node);
+            const clickedOutsideMobile = !mobileDropdownRef.current || !mobileDropdownRef.current.contains(event.target as Node);
+            
+            if (clickedOutsideDesktop && clickedOutsideMobile) {
                 setShowDropdown(false)
             }
         }
@@ -90,8 +94,7 @@ export default function LandingPage() {
                                         Community
                                     </Link>
                                     
-                                    {/* Profile Dropdown */}
-                                    <div className="relative animate-fade-in" ref={dropdownRef}>
+                                    <div className="relative animate-fade-in" ref={desktopDropdownRef}>
                                         <button
                                             onClick={() => setShowDropdown(!showDropdown)}
                                             className="flex items-center gap-2 px-2 py-1.5 rounded-full transition hover:bg-gray-100 dark:hover:bg-slate-800"
@@ -167,7 +170,7 @@ export default function LandingPage() {
                         {/* Mobile Menu Button */}
                         <div className="flex md:hidden items-center gap-2">
                             {isLoggedIn && user ? (
-                                <div className="relative" ref={dropdownRef}>
+                                <div className="relative" ref={mobileDropdownRef}>
                                     <button
                                         onClick={() => setShowDropdown(!showDropdown)}
                                         className="flex items-center gap-1.5 p-1 rounded-full transition hover:bg-gray-100 dark:hover:bg-slate-800"
@@ -178,6 +181,59 @@ export default function LandingPage() {
                                             </span>
                                         </div>
                                     </button>
+
+                                    {showDropdown && (
+                                        <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-2 border bg-white border-gray-200 text-gray-900 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 z-50">
+                                            <div className="px-4 py-2 border-b border-gray-200 dark:border-slate-700">
+                                                <p className="text-sm font-semibold truncate">{user.name}</p>
+                                                <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                                            </div>
+
+                                            <Link
+                                                href="/dashboard"
+                                                onClick={() => setShowDropdown(false)}
+                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                                            >
+                                                <Target className="w-4 h-4 text-emerald-600" />
+                                                Dashboard
+                                            </Link>
+
+                                            <Link
+                                                href="/dashboard/profile"
+                                                onClick={() => setShowDropdown(false)}
+                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                                            >
+                                                <User className="w-4 h-4" />
+                                                Profile
+                                            </Link>
+
+                                            <Link
+                                                href="/dashboard/settings"
+                                                onClick={() => setShowDropdown(false)}
+                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                                            >
+                                                <Settings className="w-4 h-4" />
+                                                Settings
+                                            </Link>
+
+                                            <Link
+                                                href="/dashboard/chats"
+                                                onClick={() => setShowDropdown(false)}
+                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                                            >
+                                                <MessageSquare className="w-4 h-4" />
+                                                Chats
+                                            </Link>
+
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full text-left px-4 py-2 transition-colors flex items-center gap-2 border-t mt-2 text-red-650 hover:bg-red-50 dark:text-rose-300 dark:border-slate-700 dark:hover:bg-slate-800"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                Logout
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <Link
@@ -222,10 +278,6 @@ export default function LandingPage() {
                                 >
                                     Start Your Bucket List
                                     <ChevronRight className="w-5 h-5" />
-                                </Link>
-                                <Link href="/explore" className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:border-gray-300 transition-all flex items-center justify-center gap-2 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:hover:border-slate-500">
-                                    <Play className="w-5 h-5" />
-                                    Preview Community
                                 </Link>
                             </div>
 

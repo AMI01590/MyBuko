@@ -18,7 +18,8 @@ import {
   ThumbsUp,
   Heart,
   Sparkles,
-  PartyPopper
+  PartyPopper,
+  Trash2
 } from 'lucide-react'
 
 // Define the chat theme structures
@@ -40,38 +41,38 @@ const CHAT_THEMES: ChatTheme[] = [
     bg: 'bg-slate-50 dark:bg-slate-950',
     listBg: 'bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800',
     sentBubble: 'bg-blue-600 text-white shadow-sm shadow-blue-500/10',
-    receivedBubble: 'bg-slate-100 text-slate-950 dark:bg-slate-850 dark:text-slate-100 border-slate-100 dark:border-slate-800',
+    receivedBubble: 'bg-slate-100 text-slate-950 dark:bg-slate-800 dark:text-slate-100 border-slate-100 dark:border-slate-800',
     inputBg: 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800',
     accent: 'text-blue-600 dark:text-blue-400'
   },
   {
     id: 'sunset',
     name: 'Sunset Peach',
-    bg: 'bg-orange-50/20 dark:bg-slate-955',
+    bg: 'bg-orange-50/20 dark:bg-slate-950',
     listBg: 'bg-gradient-to-b from-orange-50/30 via-white to-pink-50/30 dark:from-slate-950 dark:via-slate-900/40 dark:to-pink-950/10 border-orange-100 dark:border-pink-900/25',
-    sentBubble: 'bg-gradient-to-r from-orange-500 via-pink-550 to-rose-600 text-white shadow-md shadow-pink-500/20',
+    sentBubble: 'bg-gradient-to-r from-orange-500 via-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/20',
     receivedBubble: 'bg-white/90 text-orange-950 dark:bg-slate-900/90 dark:text-orange-100 border-orange-100/50 dark:border-orange-900/15',
-    inputBg: 'bg-orange-50/40 dark:bg-slate-955 border-orange-200/50 dark:border-orange-900/20',
+    inputBg: 'bg-orange-50/40 dark:bg-slate-950 border-orange-200/50 dark:border-orange-900/20',
     accent: 'text-orange-500 dark:text-orange-400'
   },
   {
     id: 'emerald',
     name: 'Emerald Forest',
-    bg: 'bg-emerald-50/10 dark:bg-slate-955',
+    bg: 'bg-emerald-50/10 dark:bg-slate-950',
     listBg: 'bg-gradient-to-b from-emerald-50/30 via-white to-teal-50/30 dark:from-slate-950 dark:via-slate-900/40 dark:to-teal-950/10 border-emerald-100 dark:border-emerald-900/25',
     sentBubble: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-md shadow-emerald-500/20',
     receivedBubble: 'bg-white/95 text-slate-900 dark:bg-slate-900/90 dark:text-emerald-100 border-emerald-100/50 dark:border-emerald-900/15',
-    inputBg: 'bg-emerald-50/30 dark:bg-slate-955 border-emerald-200/50 dark:border-emerald-900/20',
-    accent: 'text-emerald-600 dark:text-emerald-450'
+    inputBg: 'bg-emerald-50/30 dark:bg-slate-950 border-emerald-200/50 dark:border-emerald-900/20',
+    accent: 'text-emerald-600 dark:text-emerald-400'
   },
   {
     id: 'lavender',
     name: 'Lavender Dream',
-    bg: 'bg-indigo-50/10 dark:bg-slate-955',
+    bg: 'bg-indigo-50/10 dark:bg-slate-950',
     listBg: 'bg-gradient-to-b from-indigo-50/30 via-white to-purple-50/30 dark:from-slate-950 dark:via-slate-900/40 dark:to-purple-950/10 border-indigo-100 dark:border-purple-900/25',
-    sentBubble: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-550 text-white shadow-md shadow-purple-500/20',
+    sentBubble: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-600 text-white shadow-md shadow-purple-500/20',
     receivedBubble: 'bg-white/95 text-indigo-950 dark:bg-slate-900/90 dark:text-indigo-100 border-indigo-100/50 dark:border-indigo-900/15',
-    inputBg: 'bg-indigo-50/30 dark:bg-slate-955 border-indigo-200/50 dark:border-indigo-900/20',
+    inputBg: 'bg-indigo-50/30 dark:bg-slate-950 border-indigo-200/50 dark:border-indigo-900/20',
     accent: 'text-indigo-500 dark:text-indigo-400'
   },
   {
@@ -79,9 +80,9 @@ const CHAT_THEMES: ChatTheme[] = [
     name: 'Neo Cyberpunk',
     bg: 'bg-black text-cyan-400',
     listBg: 'bg-zinc-950 border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.08)]',
-    sentBubble: 'bg-gradient-to-r from-fuchsia-600 to-pink-655 text-white border border-fuchsia-400 shadow-[0_0_12px_rgba(240,46,170,0.4)]',
+    sentBubble: 'bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white border border-fuchsia-400 shadow-[0_0_12px_rgba(240,46,170,0.4)]',
     receivedBubble: 'bg-zinc-900 text-cyan-300 border border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.15)]',
-    inputBg: 'bg-black border-cyan-550/40 text-cyan-100 placeholder-cyan-700',
+    inputBg: 'bg-black border-cyan-500/40 text-cyan-100 placeholder-cyan-700',
     accent: 'text-cyan-500'
   }
 ]
@@ -135,6 +136,43 @@ export default function ChatRoomPage() {
   const [showPickerPanel, setShowPickerPanel] = useState(false)
   const [activePickerTab, setActivePickerTab] = useState<'emoji' | 'gif' | 'sticker'>('emoji')
 
+  // Selected message for deletion modal
+  const [selectedDeleteMessage, setSelectedDeleteMessage] = useState<any | null>(null)
+
+  const handleDeleteMessage = async (deleteType: 'me' | 'everyone') => {
+    if (!selectedDeleteMessage) return
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+    if (!token) return
+
+    try {
+      const res = await fetch(`/api/messages/${selectedDeleteMessage.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ deleteType })
+      })
+
+      if (res.ok) {
+        setMessages(prev => {
+          if (deleteType === 'everyone') {
+            return prev.map(m => m.id === selectedDeleteMessage.id ? { ...m, deletedForEveryone: true, text: 'This message was deleted', fileUrl: null, fileType: null } : m)
+          } else {
+            return prev.filter(m => m.id !== selectedDeleteMessage.id)
+          }
+        })
+      } else {
+        alert('Failed to delete message.')
+      }
+    } catch (err) {
+      console.error('Error deleting message:', err)
+      alert('Error deleting message.')
+    } finally {
+      setSelectedDeleteMessage(null)
+    }
+  }
+
   useEffect(() => {
     const storedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
@@ -152,18 +190,17 @@ export default function ChatRoomPage() {
     const fetchMessages = async () => {
       try {
         const res = await fetch(`/api/chats/${chatId}/messages`, { headers: { Authorization: `Bearer ${token}` } })
+        if (res.status === 401) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          router.push('/auth/login')
+          return
+        }
         if (res.ok) {
           const data = await res.json()
           setMessages(data.messages || [])
-          
-          const chatsRes = await fetch('/api/chats', { headers: { Authorization: `Bearer ${token}` } })
-          if (chatsRes.ok) {
-            const list = await chatsRes.json()
-            const chat = list.chats.find((c: any) => c.id === chatId)
-            if (chat) {
-              const otherP = chat.participants.find((p: any) => p.userId !== parsed.id)?.user
-              setOther(otherP)
-            }
+          if (data.other) {
+            setOther(data.other)
           }
         }
       } catch (err) {
@@ -308,7 +345,7 @@ export default function ChatRoomPage() {
           <div className="relative">
             <button
               onClick={() => setShowThemePicker(!showThemePicker)}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full border shadow-sm transition hover:scale-103 ${isGlobalDark ? 'bg-slate-800 border-slate-700 text-slate-250' : 'bg-white border-gray-255 text-gray-700'}`}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full border shadow-sm transition hover:scale-103 ${isGlobalDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-white border-gray-200 text-gray-700'}`}
             >
               <Palette className="w-4 h-4 text-purple-500" />
               Theme: {chatTheme.name}
@@ -316,13 +353,13 @@ export default function ChatRoomPage() {
 
             {showThemePicker && (
               <div className={`absolute right-0 mt-2 z-50 w-48 rounded-2xl border p-2 shadow-2xl ${isGlobalDark ? 'bg-slate-900 border-slate-800 text-slate-200' : 'bg-white border-gray-200 text-slate-900'}`}>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 py-1.5 border-b border-opacity-50 dark:border-slate-850">Select Theme</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 py-1.5 border-b border-opacity-50 dark:border-slate-800">Select Theme</p>
                 <div className="space-y-1 mt-1">
                   {CHAT_THEMES.map((themeItem) => (
                     <button
                       key={themeItem.id}
                       onClick={() => changeTheme(themeItem)}
-                      className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-colors ${chatTheme.id === themeItem.id ? 'bg-purple-100/60 dark:bg-purple-900/30 text-purple-650 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-850'}`}
+                      className={`w-full text-left px-3 py-2 text-sm rounded-xl transition-colors ${chatTheme.id === themeItem.id ? 'bg-purple-100/60 dark:bg-purple-900/30 text-purple-600 font-semibold' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                     >
                       {themeItem.name}
                     </button>
@@ -352,63 +389,87 @@ export default function ChatRoomPage() {
               const isImg = m.fileType?.startsWith('image/') || m.fileType === 'sticker'
 
               return (
-                <div key={m.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                  <div className={`max-w-[70%] rounded-2xl px-4 py-3 border border-opacity-40 ${isMine ? chatTheme.sentBubble : chatTheme.receivedBubble}`}>
+                <div key={m.id} className={`flex flex-col w-full ${isMine ? 'items-end' : 'items-start'}`}>
+                  <div className={`flex items-center gap-2 max-w-[75%] group ${isMine ? 'flex-row-reverse' : 'flex-row'}`}>
                     
-                    {/* Text content */}
-                    {m.text && <p className="leading-relaxed whitespace-pre-wrap">{m.text}</p>}
+                    <div className={`rounded-2xl px-4 py-3 border border-opacity-40 shadow-sm ${
+                      m.deletedForEveryone 
+                        ? 'bg-slate-100/50 text-slate-500 dark:bg-slate-900/40 dark:text-slate-400 border-slate-200/50 dark:border-slate-800/40 italic' 
+                        : isMine ? chatTheme.sentBubble : chatTheme.receivedBubble
+                    }`}>
+                      {m.deletedForEveryone ? (
+                        <div className="flex items-center gap-2 text-xs opacity-75">
+                          <span>🚫 This message was deleted</span>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Text content */}
+                          {m.text && <p className="leading-relaxed whitespace-pre-wrap">{m.text}</p>}
 
-                    {/* Rich media renderings */}
-                    {m.fileUrl && (
-                      <div className={m.text ? "mt-3" : ""}>
-                        {isImg && (
-                          <div className="relative group overflow-hidden rounded-xl bg-slate-100/10">
-                            <img
-                              src={m.fileUrl}
-                              alt="Attachment"
-                              className="max-h-60 max-w-full rounded-xl object-contain transition group-hover:scale-101 cursor-pointer"
-                            />
-                            <a
-                              href={m.fileUrl}
-                              download
-                              className="absolute bottom-2 right-2 p-2 bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 transition duration-300 hover:bg-black/80"
-                            >
-                              <Download className="w-4 h-4" />
-                            </a>
-                          </div>
-                        )}
+                          {/* Rich media renderings */}
+                          {m.fileUrl && (
+                            <div className={m.text ? "mt-3" : ""}>
+                              {isImg && (
+                                <div className="relative overflow-hidden rounded-xl bg-slate-100/10">
+                                  <img
+                                    src={m.fileUrl}
+                                    alt="Attachment"
+                                    className="max-h-60 max-w-full rounded-xl object-contain transition group-hover:scale-101 cursor-pointer"
+                                  />
+                                  <a
+                                    href={m.fileUrl}
+                                    download
+                                    className="absolute bottom-2 right-2 p-2 bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 transition duration-300 hover:bg-black/80"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </a>
+                                </div>
+                              )}
 
-                        {isVid && (
-                          <video src={m.fileUrl} controls className="max-h-60 max-w-full rounded-xl shadow-sm" />
-                        )}
+                              {isVid && (
+                                <video src={m.fileUrl} controls className="max-h-60 max-w-full rounded-xl shadow-sm" />
+                              )}
 
-                        {isDoc && (
-                          <div className={`flex items-center gap-3 p-3 rounded-xl border ${isMine ? 'bg-black/10 border-white/20' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'}`}>
-                            <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-5 h-5" />
+                              {isDoc && (
+                                <div className={`flex items-center gap-3 p-3 rounded-xl border ${isMine ? 'bg-black/10 border-white/20' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800'}`}>
+                                  <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <FileText className="w-5 h-5" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-semibold truncate text-slate-800 dark:text-slate-200">
+                                      {m.fileUrl.split('/').pop()?.substring(13) || 'Shared Document'}
+                                    </p>
+                                    <p className="text-xs text-slate-400">File Attachment</p>
+                                  </div>
+                                  <a
+                                    href={m.fileUrl}
+                                    download
+                                    className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0 text-slate-500"
+                                    title="Download Attachment"
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </a>
+                                </div>
+                              )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold truncate text-slate-800 dark:text-slate-205">
-                                {m.fileUrl.split('/').pop()?.substring(13) || 'Shared Document'}
-                              </p>
-                              <p className="text-xs text-slate-400">File Attachment</p>
-                            </div>
-                            <a
-                              href={m.fileUrl}
-                              download
-                              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition flex-shrink-0 text-slate-550"
-                              title="Download Attachment"
-                            >
-                              <Download className="w-4 h-4" />
-                            </a>
-                          </div>
-                        )}
-                      </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {!m.deletedForEveryone && (
+                      <button
+                        onClick={() => setSelectedDeleteMessage(m)}
+                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition p-1.5 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-500 rounded-full border border-transparent hover:border-red-200 dark:hover:border-red-900/40 text-slate-400 cursor-pointer self-center"
+                        title="Delete Message"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     )}
                   </div>
                   
                   {/* Timestamp */}
-                  <span className="text-[10px] text-slate-450 mt-1 px-1">
+                  <span className="text-[10px] text-slate-500 mt-1 px-1">
                     {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -419,25 +480,25 @@ export default function ChatRoomPage() {
 
         {/* Emojis, Stickers, GIFs pickers panel */}
         {showPickerPanel && (
-          <div className={`mb-4 p-4 rounded-3xl border shadow-xl animate-fade-in ${isGlobalDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-150'}`}>
+          <div className={`mb-4 p-4 rounded-3xl border shadow-xl animate-fade-in ${isGlobalDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200'}`}>
             
             {/* Panel Tabs */}
-            <div className="flex gap-2 border-b pb-3 border-opacity-40 border-slate-350 mb-3">
+            <div className="flex gap-2 border-b pb-3 border-opacity-40 border-slate-300 mb-3">
               <button
                 onClick={() => setActivePickerTab('emoji')}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${activePickerTab === 'emoji' ? 'bg-purple-100 text-purple-650 dark:bg-purple-900/30' : 'text-slate-455 hover:bg-slate-100'}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${activePickerTab === 'emoji' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' : 'text-slate-500 hover:bg-slate-100'}`}
               >
                 😊 Emojis
               </button>
               <button
                 onClick={() => setActivePickerTab('gif')}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${activePickerTab === 'gif' ? 'bg-purple-100 text-purple-650 dark:bg-purple-900/30' : 'text-slate-455 hover:bg-slate-100'}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${activePickerTab === 'gif' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' : 'text-slate-500 hover:bg-slate-100'}`}
               >
                 🎥 GIFs
               </button>
               <button
                 onClick={() => setActivePickerTab('sticker')}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${activePickerTab === 'sticker' ? 'bg-purple-100 text-purple-650 dark:bg-purple-900/30' : 'text-slate-455 hover:bg-slate-100'}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition ${activePickerTab === 'sticker' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' : 'text-slate-500 hover:bg-slate-100'}`}
               >
                 🎨 Stickers
               </button>
@@ -500,7 +561,7 @@ export default function ChatRoomPage() {
           
           {/* File Selected Indicator */}
           {fileNameText && (
-            <div className="flex items-center justify-between text-xs px-3 py-1.5 rounded-xl bg-blue-100/50 text-blue-750 dark:bg-blue-900/20 dark:text-blue-300">
+            <div className="flex items-center justify-between text-xs px-3 py-1.5 rounded-xl bg-blue-100/50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
               <span className="font-semibold truncate max-w-xs">📎 Selected file: {fileNameText}</span>
               <button
                 onClick={() => { setFile(null); setFileNameText('') }}
@@ -515,14 +576,14 @@ export default function ChatRoomPage() {
             {/* Smileys button */}
             <button
               onClick={() => setShowPickerPanel(!showPickerPanel)}
-              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition text-slate-550"
+              className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition text-slate-500"
               title="Add Emoji, GIF, or Sticker"
             >
               <Smile className="w-5 h-5" />
             </button>
 
             {/* Custom styled File Upload icon */}
-            <label className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition text-slate-550" title="Attach file">
+            <label className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition text-slate-500" title="Attach file">
               <Paperclip className="w-5 h-5" />
               <input
                 type="file"
@@ -546,12 +607,48 @@ export default function ChatRoomPage() {
             <button
               onClick={sendMessage}
               disabled={uploading || (!text.trim() && !file)}
-              className={`p-3 rounded-full text-white transition disabled:opacity-40 disabled:cursor-not-allowed ${chatTheme.id === 'neon' ? 'bg-pink-600 hover:bg-pink-750' : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'}`}
+              className={`p-3 rounded-full text-white transition disabled:opacity-40 disabled:cursor-not-allowed ${chatTheme.id === 'neon' ? 'bg-pink-600 hover:bg-pink-700' : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'}`}
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
         </div>
+
+        {/* WhatsApp style delete message confirmation modal */}
+        {selectedDeleteMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+            <div className={`w-full max-w-sm rounded-[2rem] p-6 border shadow-2xl transition duration-300 ${isGlobalDark ? 'bg-slate-900 border-slate-800 text-slate-200' : 'bg-white border-slate-100 text-slate-800'}`}>
+              <h3 className="text-lg font-bold mb-3">Delete Message?</h3>
+              <p className="text-sm opacity-70 mb-6 leading-relaxed">
+                Would you like to delete this message for yourself, or delete it for everyone?
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => handleDeleteMessage('me')}
+                  className="w-full py-3 text-sm font-semibold rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition"
+                >
+                  Delete for me
+                </button>
+                
+                {selectedDeleteMessage.senderId === user?.id && (
+                  <button
+                    onClick={() => handleDeleteMessage('everyone')}
+                    className="w-full py-3 text-sm font-semibold rounded-full bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/20 transition"
+                  >
+                    Delete for everyone
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setSelectedDeleteMessage(null)}
+                  className="w-full py-3 text-sm font-semibold rounded-full border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>
