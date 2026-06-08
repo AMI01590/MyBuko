@@ -2,8 +2,18 @@
 
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useTheme } from '../theme-provider'
-import ExploreFeed from '@/components/ExploreFeed'
+
+const ExploreFeed = dynamic(() => import('@/components/ExploreFeed'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center py-20 gap-3">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600"></div>
+      <p className="text-sm text-slate-500 dark:text-slate-400">Loading community feed...</p>
+    </div>
+  ),
+})
 
 export default function ExplorePage() {
   const { theme } = useTheme()
