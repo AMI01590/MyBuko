@@ -13,9 +13,8 @@ export default function LandingPage() {
     const { theme, setTheme } = useTheme()
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [user, setUser] = useState<any>(null)
-    const [showDropdown, setShowDropdown] = useState(false)
-    const desktopDropdownRef = useRef<HTMLDivElement | null>(null)
-    const mobileDropdownRef = useRef<HTMLDivElement | null>(null)
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const menuRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
         if (typeof window === 'undefined') return
@@ -25,7 +24,7 @@ export default function LandingPage() {
         if (userData) {
             try {
                 setUser(JSON.parse(userData))
-            } catch {}
+            } catch { }
         }
     }, [])
 
@@ -35,16 +34,13 @@ export default function LandingPage() {
         document.cookie = 'token=; path=/; max-age=0'
         setIsLoggedIn(false)
         setUser(null)
-        setShowDropdown(false)
+        setIsMenuOpen(false)
     }
 
     useEffect(() => {
         const handleOutsideClick = (event: MouseEvent) => {
-            const clickedOutsideDesktop = !desktopDropdownRef.current || !desktopDropdownRef.current.contains(event.target as Node);
-            const clickedOutsideMobile = !mobileDropdownRef.current || !mobileDropdownRef.current.contains(event.target as Node);
-            
-            if (clickedOutsideDesktop && clickedOutsideMobile) {
-                setShowDropdown(false)
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false)
             }
         }
 
@@ -67,181 +63,129 @@ export default function LandingPage() {
                             <span className="text-xl font-bold text-gray-900 dark:text-white">MYBUKO</span>
                         </div>
 
-                        {/* Nav Links */}
-                        <div className="hidden md:flex items-center gap-4">
-                            {/* Removed duplicate Explore link - keep Preview Community CTA only */}
-                            <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:text-white">
-                                How it Works
-                            </a>
-                            <a href="#inspiration" className="text-gray-600 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:text-white">
-                                Inspiration
-                            </a>
+                        {/* Unified Right Actions */}
+                        <div className="flex items-center gap-3">
+                            {/* Dark Mode Icon Only Toggle */}
                             <button
                                 type="button"
                                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                                className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+                                aria-label="Toggle Dark Mode"
+                                className="w-10 h-10 flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                             >
-                                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                                {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5 text-slate-750" />}
                             </button>
-                            {isLoggedIn && user ? (
-                                <div className="flex items-center gap-4">
-                                    <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:text-white font-medium">
-                                        Dashboard
-                                    </Link>
-                                    <Link href="/explore" className="text-gray-600 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:text-white font-medium">
-                                        Community
-                                    </Link>
-                                    
-                                    <div className="relative animate-fade-in" ref={desktopDropdownRef}>
-                                        <button
-                                            onClick={() => setShowDropdown(!showDropdown)}
-                                            className="flex items-center gap-2 px-2 py-1.5 rounded-full transition hover:bg-gray-100 dark:hover:bg-slate-800"
-                                        >
-                                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center">
-                                                <span className="text-white font-bold text-sm">
-                                                    {user.name ? user.name.charAt(0).toUpperCase() : 'J'}
-                                                </span>
-                                            </div>
-                                            <ChevronDown className="w-4 h-4 text-gray-600 dark:text-slate-200" />
-                                        </button>
 
-                                        {showDropdown && (
-                                            <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-2 border bg-white border-gray-200 text-gray-900 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 z-50">
-                                                <div className="px-4 py-2 border-b border-gray-200 dark:border-slate-700">
-                                                    <p className="text-sm font-semibold truncate">{user.name}</p>
-                                                    <p className="text-xs text-slate-400 truncate">{user.email}</p>
-                                                </div>
-
-                                                <Link
-                                                    href="/dashboard/profile"
-                                                    onClick={() => setShowDropdown(false)}
-                                                    className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                                >
-                                                    <User className="w-4 h-4" />
-                                                    Profile
-                                                </Link>
-
-                                                <Link
-                                                    href="/dashboard/settings"
-                                                    onClick={() => setShowDropdown(false)}
-                                                    className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                                >
-                                                    <Settings className="w-4 h-4" />
-                                                    Settings
-                                                </Link>
-
-                                                <Link
-                                                    href="/dashboard/chats"
-                                                    onClick={() => setShowDropdown(false)}
-                                                    className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                                >
-                                                    <MessageSquare className="w-4 h-4" />
-                                                    Chats
-                                                </Link>
-
-                                                <button
-                                                    onClick={handleLogout}
-                                                    className="w-full text-left px-4 py-2 transition-colors flex items-center gap-2 border-t mt-2 text-red-650 hover:bg-red-50 dark:text-rose-300 dark:border-slate-700 dark:hover:bg-slate-800"
-                                                >
-                                                    <LogOut className="w-4 h-4" />
-                                                    Logout
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 transition-colors dark:text-slate-300 dark:hover:text-white">
-                                        Login
-                                    </Link>
-                                    <Link
-                                        href="/dashboard"
-                                        className="px-6 py-2 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-lg hover:shadow-lg transition-all"
-                                    >
-                                        Start Planning
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-
-                        {/* Mobile Menu Button */}
-                        <div className="flex md:hidden items-center gap-2">
-                            {isLoggedIn && user ? (
-                                <div className="relative" ref={mobileDropdownRef}>
-                                    <button
-                                        onClick={() => setShowDropdown(!showDropdown)}
-                                        className="flex items-center gap-1.5 p-1 rounded-full transition hover:bg-gray-100 dark:hover:bg-slate-800"
-                                    >
-                                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center">
-                                            <span className="text-white font-bold text-sm">
+                            {/* Dropdown Menu */}
+                            <div className="relative" ref={menuRef}>
+                                <button
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 font-medium text-sm cursor-pointer"
+                                >
+                                    {isLoggedIn && user ? (
+                                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center">
+                                            <span className="text-white font-bold text-xs">
                                                 {user.name ? user.name.charAt(0).toUpperCase() : 'J'}
                                             </span>
                                         </div>
-                                    </button>
-
-                                    {showDropdown && (
-                                        <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg py-2 border bg-white border-gray-200 text-gray-900 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 z-50">
-                                            <div className="px-4 py-2 border-b border-gray-200 dark:border-slate-700">
-                                                <p className="text-sm font-semibold truncate">{user.name}</p>
-                                                <p className="text-xs text-slate-400 truncate">{user.email}</p>
-                                            </div>
-
-                                            <Link
-                                                href="/dashboard"
-                                                onClick={() => setShowDropdown(false)}
-                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                            >
-                                                <Target className="w-4 h-4 text-emerald-600" />
-                                                Dashboard
-                                            </Link>
-
-                                            <Link
-                                                href="/dashboard/profile"
-                                                onClick={() => setShowDropdown(false)}
-                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                            >
-                                                <User className="w-4 h-4" />
-                                                Profile
-                                            </Link>
-
-                                            <Link
-                                                href="/dashboard/settings"
-                                                onClick={() => setShowDropdown(false)}
-                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                            >
-                                                <Settings className="w-4 h-4" />
-                                                Settings
-                                            </Link>
-
-                                            <Link
-                                                href="/dashboard/chats"
-                                                onClick={() => setShowDropdown(false)}
-                                                className="block px-4 py-2 transition-colors flex items-center gap-2 text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                                            >
-                                                <MessageSquare className="w-4 h-4" />
-                                                Chats
-                                            </Link>
-
-                                            <button
-                                                onClick={handleLogout}
-                                                className="w-full text-left px-4 py-2 transition-colors flex items-center gap-2 border-t mt-2 text-red-650 hover:bg-red-50 dark:text-rose-300 dark:border-slate-700 dark:hover:bg-slate-800"
-                                            >
-                                                <LogOut className="w-4 h-4" />
-                                                Logout
-                                            </button>
-                                        </div>
+                                    ) : (
+                                        <span className="px-1 text-slate-700 dark:text-slate-200">Menu</span>
                                     )}
-                                </div>
-                            ) : (
-                                <Link
-                                    href="/auth/login"
-                                    className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-lg text-sm font-medium"
-                                >
-                                    Login
-                                </Link>
-                            )}
+                                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isMenuOpen && (
+                                    <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl py-2 border bg-white border-gray-200 text-gray-900 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 z-50 animate-slideDown">
+                                        {isLoggedIn && user && (
+                                            <div className="px-4 py-2 border-b border-gray-200 dark:border-slate-700">
+                                                <p className="text-sm font-bold truncate">{user.name}</p>
+                                                <p className="text-xs text-slate-400 truncate mt-0.5">{user.email}</p>
+                                            </div>
+                                        )}
+
+                                        <div className="py-1">
+                                            <a
+                                                href="#how-it-works"
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="block px-4 py-2 text-sm text-gray-750 hover:bg-gray-100 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                                            >
+                                                How it Works
+                                            </a>
+                                            <a
+                                                href="#inspiration"
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="block px-4 py-2 text-sm text-gray-750 hover:bg-gray-100 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                                            >
+                                                Inspiration
+                                            </a>
+                                            <Link
+                                                href="/explore"
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="block px-4 py-2 text-sm text-gray-750 hover:bg-gray-100 transition-colors dark:text-slate-200 dark:hover:bg-slate-800 font-medium"
+                                            >
+                                                Community
+                                            </Link>
+                                        </div>
+
+                                        <div className="border-t border-gray-100 dark:border-slate-800 my-1"></div>
+
+                                        {isLoggedIn && user ? (
+                                            <div className="py-1">
+                                                <Link
+                                                    href="/dashboard"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                    className="block px-4 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50 transition-colors dark:text-emerald-400 dark:hover:bg-slate-800"
+                                                >
+                                                    Dashboard
+                                                </Link>
+                                                <Link
+                                                    href="/dashboard/profile"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                    className="block px-4 py-2 text-sm text-gray-755 hover:bg-gray-100 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                                                >
+                                                    Profile
+                                                </Link>
+                                                <Link
+                                                    href="/dashboard/settings"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                    className="block px-4 py-2 text-sm text-gray-755 hover:bg-gray-100 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                                                >
+                                                    Settings
+                                                </Link>
+                                                <Link
+                                                    href="/dashboard/chats"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                    className="block px-4 py-2 text-sm text-gray-755 hover:bg-gray-100 transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                                                >
+                                                    Chats
+                                                </Link>
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 border-t border-gray-150 mt-1.5 transition-colors dark:text-rose-400 dark:border-slate-800 dark:hover:bg-slate-800 cursor-pointer"
+                                                >
+                                                    Logout
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="py-1 px-2 space-y-1">
+                                                <Link
+                                                    href="/auth/login"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                    className="block px-3 py-2 text-sm text-center font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors dark:text-slate-200 dark:hover:bg-slate-800"
+                                                >
+                                                    Login
+                                                </Link>
+                                                <Link
+                                                    href="/dashboard"
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                    className="block px-3 py-2 text-sm text-center font-semibold text-white bg-gradient-to-r from-blue-600 to-teal-600 rounded-lg hover:shadow-lg transition-all"
+                                                >
+                                                    Start Planning
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -277,6 +221,13 @@ export default function LandingPage() {
                                 >
                                     Start Your Bucket List
                                     <ChevronRight className="w-5 h-5" />
+                                </Link>
+                                <Link
+                                    href="/explore"
+                                    className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:border-gray-300 transition-all flex items-center justify-center gap-2 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:hover:border-slate-500"
+                                >
+                                    <Play className="w-5 h-5" />
+                                    Preview Community
                                 </Link>
                             </div>
 
@@ -379,10 +330,10 @@ export default function LandingPage() {
                             <div key={i} className="relative group h-full">
                                 {/* Glow backdrop */}
                                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 via-emerald-500 via-yellow-500 to-pink-500 opacity-0 group-hover:opacity-75 dark:group-hover:opacity-100 transition-all duration-500 blur-xl group-hover:blur-2xl animate-gradient-xy" />
-                                
+
                                 {/* Border glow wrapper */}
                                 <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 via-emerald-500 via-yellow-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-gradient-xy" />
-                                
+
                                 {/* Inner card content */}
                                 <div className="relative h-full flex flex-col bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl border border-gray-200 group-hover:border-transparent transition-all duration-300 dark:from-slate-900 dark:to-slate-950 dark:border-slate-700/50 dark:bg-slate-900">
                                     <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
@@ -623,25 +574,25 @@ export default function LandingPage() {
                         <div>
                             <h4 className="text-white font-semibold mb-4">Product</h4>
                             <ul className="space-y-2 text-sm">
-                                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">How it Works</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Inspiration</a></li>
+                                <li><a href="#how-it-works" className="hover:text-white transition-colors">How it Works</a></li>
+                                <li><a href="#inspiration" className="hover:text-white transition-colors">Inspiration</a></li>
+                                <li><Link href="/explore" className="hover:text-white transition-colors">Community</Link></li>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-white font-semibold mb-4">Company</h4>
                             <ul className="space-y-2 text-sm">
-                                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+                                <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
                             </ul>
                         </div>
 
                         <div>
                             <h4 className="text-white font-semibold mb-4">Legal</h4>
                             <ul className="space-y-2 text-sm">
-                                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
                             </ul>
                         </div>
                     </div>
