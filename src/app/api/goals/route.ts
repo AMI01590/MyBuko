@@ -27,11 +27,16 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const userId = getUserIdFromRequest(req)
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  try {
+    const userId = getUserIdFromRequest(req)
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-  const goals = await listGoals(userId)
-  return NextResponse.json(goals)
+    const goals = await listGoals(userId)
+    return NextResponse.json(goals)
+  } catch (error: any) {
+    console.error('List goals API error:', error)
+    return NextResponse.json({ error: error?.message || 'Failed to list goals' }, { status: 500 })
+  }
 }

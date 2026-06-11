@@ -197,7 +197,8 @@ export default function ProfilePage() {
         }
 
         if (!res.ok) {
-          console.error('Failed to fetch goals for profile stats')
+          const errText = await res.text().catch(() => '')
+          console.error(`Failed to fetch goals for profile stats: ${res.status} ${errText}`)
           return
         }
 
