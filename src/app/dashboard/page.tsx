@@ -205,6 +205,13 @@ export default function DashboardPage() {
       )
     : myPosts
 
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    document.cookie = 'token=; path=/; max-age=0'
+    router.push('/')
+  }
+
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
