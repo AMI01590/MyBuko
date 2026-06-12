@@ -8,7 +8,7 @@ import {
   Info, CalendarDays, DollarSign, MapPin, Target, Clock, TrendingUp, 
   MessageSquare, Flame, Sparkles, Award, Play, CheckCircle, Calendar, 
   ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Compass, ShieldAlert, Layers, 
-  PlusCircle, BookOpen, Activity, Lock, Eye, Bell, Globe, Sun, Moon
+  PlusCircle, BookOpen, Activity, Lock, Eye, Bell, Globe, Sun, Moon, Coins
 } from 'lucide-react'
 import { useTheme } from '../theme-provider'
 import StoriesBar from '../../components/StoriesBar'
@@ -1016,6 +1016,16 @@ export default function DashboardPage() {
                           My Profile & Achievements
                         </Link>
                         <Link
+                          href="/dashboard/finance"
+                          onClick={() => setShowDropdown(false)}
+                          className={`flex items-center gap-2.5 px-3 py-2 text-sm rounded-xl transition ${
+                            isDark ? 'hover:bg-white/5 text-slate-300' : 'hover:bg-slate-100 text-slate-700'
+                          }`}
+                        >
+                          <Coins className="w-4.5 h-4.5 text-emerald-400" />
+                          Dream Finance Planner
+                        </Link>
+                        <Link
                           href="/dashboard/settings"
                           onClick={() => setShowDropdown(false)}
                           className={`flex items-center gap-2.5 px-3 py-2 text-sm rounded-xl transition ${
@@ -1256,6 +1266,33 @@ export default function DashboardPage() {
             </div>
           </div>
 
+        </section>
+
+        {/* PREMIUM FINANCE PLANNER CALL TO ACTION */}
+        <section className={`relative rounded-3xl overflow-hidden border p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl transition-all duration-300 ${
+          isDark ? 'border-emerald-550/20 bg-gradient-to-r from-slate-900/60 via-slate-900/40 to-emerald-950/20 backdrop-blur-2xl' : 'border-slate-200 bg-white'
+        }`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-2xl ${isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
+              <Coins className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold flex items-center gap-2">
+                Dream Finance Planner
+                <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-extrabold uppercase px-1.5 py-0.5 rounded">AI Active</span>
+              </h3>
+              <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-550'}`}>
+                Plan estimated costs, calculate monthly savings streaks, optimize budgets, and consult the AI coach.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard/finance"
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:shadow-lg hover:shadow-emerald-500/15 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 shrink-0"
+          >
+            Launch Planner
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </section>
 
         {/* CENTRAL SYSTEM WORKSPACE */}
