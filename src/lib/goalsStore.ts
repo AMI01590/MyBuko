@@ -17,6 +17,8 @@ type Goal = {
   createdAt: string
   milestones?: any[]
   notes?: any[]
+  estimatedCost?: number | null
+  amountSaved?: number
 }
 
 const formatTags = (tags?: string[] | string) => {
@@ -46,6 +48,8 @@ export async function createGoal(data: Partial<Goal>) {
       visibility: data.visibility || 'Private',
       status: data.status || 'Not Started',
       progress: data.progress ?? 0,
+      estimatedCost: data.estimatedCost ?? null,
+      amountSaved: data.amountSaved ?? 0,
     },
   })
 
@@ -87,6 +91,8 @@ export async function updateGoal(id: string, updates: Partial<Goal>) {
       visibility: updates.visibility ?? existing.visibility,
       status: updates.status ?? existing.status,
       progress: updates.progress ?? existing.progress,
+      estimatedCost: updates.estimatedCost !== undefined ? updates.estimatedCost : existing.estimatedCost,
+      amountSaved: updates.amountSaved !== undefined ? updates.amountSaved : existing.amountSaved,
     },
     include: {
       milestones: {

@@ -30,6 +30,13 @@ model User {
   posts            Post[]
   postLikes        PostLike[]
   postComments     PostComment[]
+
+  monthlyIncome       Float                @default(0)
+  monthlyExpenses     Float                @default(0)
+  totalSavings        Float                @default(0)
+  savingsStreak       Int                  @default(0)
+  badges              String               @default("")
+  financeTransactions FinanceTransaction[]
 }
 model Story {
   id        String   @id @default(cuid())
@@ -232,5 +239,18 @@ model PostComment {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([postId])
+  @@index([userId])
+}
+
+model FinanceTransaction {
+  id        String   @id @default(cuid())
+  amount    Float
+  type      String   // "INCOME", "EXPENSE", "SAVINGS", "CONTRIBUTION"
+  notes     String?
+  createdAt DateTime @default(now())
+  goalId    String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
