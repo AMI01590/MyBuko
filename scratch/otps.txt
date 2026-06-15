@@ -4,3 +4,7 @@
 [2026-06-14T06:38:07.169Z] Email: giriiiakanskaha@gmail.com | OTP: 654929 | Purpose: register
 [2026-06-14T06:46:38.776Z] Email: akugiriiii@gmail.com | OTP: 156202 | Purpose: register
 [2026-06-14T07:02:26.345Z] Email: test-signup-agent-123@example.com | OTP: 541454 | Purpose: register
+[2026-06-14T07:19:25.082Z] Email: 6junesrishti@gmail.com | OTP: 585984 | Purpose: register
+[2026-06-14T07:26:56.802Z] Email: 6junesrishti@gmail.com | OTP: 494964 | Purpose: register
+[2026-06-15T12:39:17.883Z] Email: khannamishthi66@gmail.com | OTP: 785176 | Purpose: register
+[2026-06-15T12:40:02.103Z] Email: khannamishthi66@gmail.com | OTP: 277759 | Purpose: register
