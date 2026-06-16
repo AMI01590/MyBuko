@@ -8,3 +8,4 @@
 [2026-06-14T07:26:56.802Z] Email: 6junesrishti@gmail.com | OTP: 494964 | Purpose: register
 [2026-06-15T12:39:17.883Z] Email: khannamishthi66@gmail.com | OTP: 785176 | Purpose: register
 [2026-06-15T12:40:02.103Z] Email: khannamishthi66@gmail.com | OTP: 277759 | Purpose: register
+[2026-06-16T07:49:58.804Z] Email: giriiiakansksha@gmail.com | OTP: 111446 | Purpose: register
