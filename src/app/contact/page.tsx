@@ -117,11 +117,11 @@ export default function ContactPage() {
                                 For support, feedback, partnerships, or anything else — drop us a line. We aim to reply within 24–48 hours.
                             </p>
                             <a
-                                href="mailto:team@mybuko.com"
+                                href="mailto:mybuko.team@gmail.com"
                                 className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold hover:underline"
                             >
                                 <Mail className="w-4 h-4" />
-                                team@mybuko.com
+                                mybuko.team@gmail.com
                             </a>
                         </div>
 
@@ -154,7 +154,7 @@ export default function ContactPage() {
                                     @mybuko on Instagram
                                 </a>
                                 <a
-                                    href="https://github.com/mybuko"
+                                    href="https://github.com/AMI01590/MyBuko"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-3 text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition-colors text-sm font-medium"
