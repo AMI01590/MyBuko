@@ -74,7 +74,7 @@
     [class*="backdrop-blur"] {
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-        will-change: filter, backdrop-filter;
+        /* will-change: filter, backdrop-filter; -- Commented out to prevent mobile GPU paint/flicker loops */
     }
 
     /* Particle animations */

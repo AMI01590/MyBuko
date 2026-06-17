@@ -224,9 +224,13 @@ io.on('connection', (socket) => {
 
       if (!message) return;
 
-      // 2. Append new reaction
-      const currentReactions = message.reactions ? message.reactions.split(',').filter(Boolean) : [];
-      currentReactions.push(emoji);
+      // 2. Toggle reaction (add if not exists, remove if exists)
+      let currentReactions = message.reactions ? message.reactions.split(',').filter(Boolean) : [];
+      if (currentReactions.includes(emoji)) {
+        currentReactions = currentReactions.filter(r => r !== emoji);
+      } else {
+        currentReactions.push(emoji);
+      }
       const updatedReactions = currentReactions.join(',');
 
       // 3. Update database
@@ -235,8 +239,8 @@ io.on('connection', (socket) => {
         data: { reactions: updatedReactions }
       });
 
-      // 4. Broadcast the reaction in real-time to everyone else in the room
-      socket.to(chatId).emit('message_reaction', { messageId, emoji });
+      // 4. Broadcast the complete updated reaction list in real-time to everyone else in the room
+      socket.to(chatId).emit('message_reaction', { messageId, reactions: updatedReactions });
 
     } catch (err) {
       console.error('Error handling message reaction:', err);

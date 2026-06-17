@@ -77,11 +77,11 @@ const CHAT_THEMES: ChatTheme[] = [
 ]
 
 const MOCK_STICKERS = [
-  { id: 'st1', label: 'Great Job', url: 'https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=100&auto=format&fit=crop&q=60' },
-  { id: 'st2', label: 'Awesome', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60' },
-  { id: 'st3', label: 'Level Up', url: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?w=100&auto=format&fit=crop&q=60' },
-  { id: 'st4', label: 'Winner', url: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=100&auto=format&fit=crop&q=60' },
-  { id: 'st5', label: 'Keep Going', url: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=100&auto=format&fit=crop&q=60' }
+  { id: 'st1', label: 'Party Tada', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f389/512.webp' },
+  { id: 'st2', label: 'Rocket Launch', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f680/512.webp' },
+  { id: 'st3', label: 'Flex Power', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f4aa/512.webp' },
+  { id: 'st4', label: 'Gold Trophy', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f3c6/512.webp' },
+  { id: 'st5', label: 'Fire Goal', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp' }
 ]
 
 const MOCK_GIF_REACTIONS = [
@@ -489,11 +489,15 @@ export default function ChatRoomPage() {
     })
 
     // Listen for incoming message reactions
-    socket.on('message_reaction', ({ messageId, emoji }) => {
+    socket.on('message_reaction', ({ messageId, reactions }) => {
       setMessages(prev => prev.map(m => {
         if (m.id === messageId) {
-          const reacts = Array.isArray(m.reactions) ? m.reactions : []
-          return { ...m, reactions: [...reacts, emoji] }
+          return {
+            ...m,
+            reactions: typeof reactions === 'string'
+              ? reactions.split(',').filter(Boolean)
+              : Array.isArray(reactions) ? reactions : []
+          }
         }
         return m
       }))
@@ -797,7 +801,9 @@ export default function ChatRoomPage() {
     setMessages(prev => prev.map(m => {
       if (m.id === msgId) {
         const reacts = Array.isArray(m.reactions) ? m.reactions : []
-        return { ...m, reactions: [...reacts, emoji] }
+        const exists = reacts.includes(emoji)
+        const newReacts = exists ? reacts.filter(r => r !== emoji) : [...reacts, emoji]
+        return { ...m, reactions: newReacts }
       }
       return m
     }))
@@ -841,10 +847,10 @@ export default function ChatRoomPage() {
       <div className="absolute inset-0 noise-overlay pointer-events-none z-0" />
 
       {/* Main Split Layout container */}
-      <div className="max-w-7xl mx-auto px-4 py-6 h-[95vh] relative z-10 flex flex-col lg:flex-row gap-6">
+      <div className="max-w-7xl mx-auto lg:px-4 lg:py-6 h-[100dvh] lg:h-[95vh] relative z-10 flex flex-col lg:flex-row gap-6">
 
         {/* LEFT PANEL: Messages Sidebar (Desktop only) */}
-        <aside className="hidden lg:flex w-[320px] shrink-0 rounded-3xl border flex-col overflow-hidden shadow-lg bg-[#0b0f19]/80 border-white/5 shadow-glow-violet">
+        <aside className="hidden lg:flex w-[320px] shrink-0 rounded-none lg:rounded-3xl border-0 lg:border flex-col overflow-hidden shadow-none lg:shadow-lg bg-[#0b0f19]/80 border-white/5 shadow-glow-violet">
           {/* Sidebar Header */}
           <div className="p-4 border-b border-white/5 space-y-3 shrink-0">
             <div className="flex justify-between items-center">
@@ -930,7 +936,7 @@ export default function ChatRoomPage() {
         </aside>
 
         {/* RIGHT PANEL: Active conversation view */}
-        <main className={`flex-1 min-w-0 rounded-3xl border overflow-hidden flex flex-col shadow-lg transition-all ${chatTheme.listBg
+        <main className={`flex-1 min-w-0 rounded-none lg:rounded-3xl border-0 lg:border overflow-hidden flex flex-col shadow-none lg:shadow-lg transition-all ${chatTheme.listBg
           }`}>
 
           {/* Conversation Header */}
@@ -1037,7 +1043,8 @@ export default function ChatRoomPage() {
                   const isMine = m.senderId === user.id
                   const isDoc = isDocument(m.fileType, m.fileUrl)
                   const isVid = m.fileType?.startsWith('video/')
-                  const isImg = m.fileType?.startsWith('image/') || m.fileType === 'sticker'
+                  const isSticker = m.fileType === 'image/sticker' || m.fileType === 'sticker'
+                  const isImg = (m.fileType?.startsWith('image/') || m.fileType === 'sticker') && !isSticker
                   const isAudio = m.fileType?.startsWith('audio/')
 
                   // Read Receipt check based on lastSeenAt
@@ -1052,78 +1059,83 @@ export default function ChatRoomPage() {
                         onMouseLeave={() => setBubbleHoverReactionId(null)}
                       >
 
-                        {/* Message Bubble box */}
-                        <div className={`rounded-3xl px-4 py-3 border border-opacity-10 shadow-sm relative transition-all ${m.deletedForEveryone
-                            ? 'bg-slate-100/30 text-slate-400 dark:bg-white/5 dark:text-slate-500 italic border-dashed'
-                            : isMine ? chatTheme.sentBubble : chatTheme.receivedBubble
-                          } ${m.sending ? 'opacity-60 duration-150 animate-pulse' : ''}`}>
-                          {m.deletedForEveryone ? (
-                            <div className="flex items-center gap-1.5 text-[11px]">
-                              <span>🚫 Message deleted for everyone</span>
-                            </div>
-                          ) : (
-                            <>
-                              {/* Text content */}
-                              {m.text && <p className="text-xs leading-relaxed whitespace-pre-wrap">{renderMessageText(m.text)}</p>}
+                        {/* Message Bubble box or Transparent Sticker */}
+                        {isSticker ? (
+                          <div className={`relative overflow-hidden group/sticker transition-all py-1 ${m.sending ? 'opacity-60 animate-pulse' : ''}`}>
+                            {m.fileUrl && (
+                              <img
+                                src={m.fileUrl}
+                                alt="sticker"
+                                className="max-h-32 max-w-[128px] object-contain hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer select-none pointer-events-none"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div className={`rounded-3xl px-4 py-3 border border-opacity-10 shadow-sm relative transition-all ${m.deletedForEveryone
+                              ? 'bg-slate-100/30 text-slate-400 dark:bg-white/5 dark:text-slate-500 italic border-dashed'
+                              : isMine ? chatTheme.sentBubble : chatTheme.receivedBubble
+                            } ${m.sending ? 'opacity-60 duration-150 animate-pulse' : ''}`}>
+                            {m.deletedForEveryone ? (
+                              <div className="flex items-center gap-1.5 text-[11px]">
+                                <span>🚫 Message deleted for everyone</span>
+                              </div>
+                            ) : (
+                              <>
+                                {/* Text content */}
+                                {m.text && <p className="text-xs leading-relaxed whitespace-pre-wrap">{renderMessageText(m.text)}</p>}
 
-                              {/* Rich media attachments */}
-                              {m.fileUrl && (
-                                <div className={m.text ? "mt-3" : ""}>
+                                {/* Rich media attachments */}
+                                {m.fileUrl && (
+                                  <div className={m.text ? "mt-3" : ""}>
 
-                                  {isImg && (
-                                    <div className="relative overflow-hidden rounded-2xl bg-white/5">
-                                      <img
-                                        src={m.fileUrl}
-                                        alt="attachment preview"
-                                        className="max-h-52 max-w-full rounded-2xl object-contain hover:scale-101 cursor-pointer transition"
-                                      />
-                                      <a
-                                        href={m.fileUrl}
-                                        download
-                                        className="absolute bottom-2.5 right-2.5 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition"
-                                      >
-                                        <Download className="w-3.5 h-3.5" />
-                                      </a>
-                                    </div>
-                                  )}
-
-                                  {isVid && (
-                                    <video src={m.fileUrl} controls className="max-h-52 max-w-full rounded-2xl" />
-                                  )}
-
-                                  {isAudio && (
-                                    <AudioPlayer src={m.fileUrl} />
-                                  )}
-
-                                  {isDoc && (
-                                    <div className={`flex items-center gap-2.5 p-2.5 rounded-2xl border text-left ${isMine ? 'bg-black/10 border-white/10' : 'bg-slate-55 dark:bg-slate-900 border-slate-200 dark:border-white/5'
-                                      }`}>
-                                      <FileText className="w-5 h-5 text-indigo-400 shrink-0" />
-                                      <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200">
-                                          {m.fileUrl.split('/').pop()?.substring(13) || 'Attached Document'}
-                                        </p>
-                                        <p className="text-[9px] text-slate-500">File Attachment</p>
+                                    {isImg && (
+                                      <div className="relative overflow-hidden rounded-2xl bg-white/5">
+                                        <img
+                                          src={m.fileUrl}
+                                          alt="attachment preview"
+                                          className="max-h-52 max-w-full rounded-2xl object-contain hover:scale-101 cursor-pointer transition"
+                                        />
+                                        <a
+                                          href={m.fileUrl}
+                                          download
+                                          className="absolute bottom-2.5 right-2.5 p-1.5 bg-black/60 rounded-full text-white hover:bg-black/80 transition"
+                                        >
+                                          <Download className="w-3.5 h-3.5" />
+                                        </a>
                                       </div>
-                                      <a href={m.fileUrl} download className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-full text-slate-500">
-                                        <Download className="w-4 h-4" />
-                                      </a>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                                    )}
 
-                              {/* Floating Reactions on bubble */}
-                              {m.reactions && m.reactions.length > 0 && (
-                                <div className="absolute -bottom-2.5 right-3 flex gap-1 bg-slate-900 border border-white/10 rounded-full px-1.5 py-0.5 z-10 text-[10px]">
-                                  {m.reactions.map((emoji, idx) => (
-                                    <span key={idx}>{emoji}</span>
-                                  ))}
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
+                                    {isVid && (
+                                      <video src={m.fileUrl} controls className="max-h-52 max-w-full rounded-2xl" />
+                                    )}
+
+                                    {isAudio && (
+                                      <AudioPlayer src={m.fileUrl} />
+                                    )}
+
+                                    {isDoc && (
+                                      <div className={`flex items-center gap-2.5 p-2.5 rounded-2xl border text-left ${isMine ? 'bg-black/10 border-white/10' : 'bg-slate-55 dark:bg-slate-900 border-slate-200 dark:border-white/5'
+                                        }`}>
+                                        <FileText className="w-5 h-5 text-indigo-400 shrink-0" />
+                                        <div className="min-w-0 flex-1">
+                                          <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200">
+                                            {m.fileUrl.split('/').pop()?.substring(13) || 'Attached Document'}
+                                          </p>
+                                          <p className="text-[9px] text-slate-500">File Attachment</p>
+                                        </div>
+                                        <a href={m.fileUrl} download className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded-full text-slate-500">
+                                          <Download className="w-4 h-4" />
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Floating Reactions on bubble removed from here and moved to parent layout */}
+                              </>
+                            )}
+                          </div>
+                        )}
 
                         {/* Micro-interaction controls on hover */}
                         {!m.deletedForEveryone && !m.sending && bubbleHoverReactionId === m.id && (
@@ -1151,6 +1163,17 @@ export default function ChatRoomPage() {
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
+                          </div>
+                        )}
+
+                        {/* Floating Reactions on message item (floating transparently for stickers, images and texts) */}
+                        {m.reactions && m.reactions.length > 0 && (
+                          <div className={`absolute -bottom-2 flex gap-1 bg-slate-900 border border-white/10 rounded-full px-1.5 py-0.5 z-30 text-[10px] ${
+                            isMine ? 'left-3' : 'right-3'
+                          }`}>
+                            {m.reactions.map((emoji, idx) => (
+                              <span key={idx}>{emoji}</span>
+                            ))}
                           </div>
                         )}
                       </div>

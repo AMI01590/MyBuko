@@ -200,10 +200,10 @@ export default function ChatsListPage() {
       <div className="absolute inset-0 noise-overlay pointer-events-none z-0" />
 
       {/* Main Split Screen container */}
-      <div className="max-w-7xl mx-auto px-4 py-6 h-[95vh] relative z-10 flex flex-col lg:flex-row gap-6">
+      <div className="max-w-7xl mx-auto lg:px-4 lg:py-6 h-[100dvh] lg:h-[95vh] relative z-10 flex flex-col lg:flex-row gap-6">
         
         {/* LEFT PANEL: Chat List Sidebar */}
-        <aside className={`w-full lg:w-[380px] shrink-0 rounded-3xl border flex flex-col overflow-hidden transition-all duration-300 shadow-lg ${
+        <aside className={`w-full lg:w-[380px] shrink-0 rounded-none lg:rounded-3xl border-0 lg:border flex flex-col overflow-hidden transition-all duration-300 shadow-none lg:shadow-lg ${
           isDark 
             ? 'bg-[#0b0f19]/80 backdrop-blur-xl border-white/5 shadow-glow-violet' 
             : 'bg-white border-slate-200 shadow-sm'
