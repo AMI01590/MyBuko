@@ -84,18 +84,7 @@ const MOCK_STICKERS = [
   { id: 'st5', label: 'Fire Goal', url: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp' }
 ]
 
-const MOCK_GIF_REACTIONS = [
-  { id: 'gif1', name: 'Congratulations', url: 'https://i.giphy.com/3ocD4yGjOgu7G9Gel6.gif' },
-  { id: 'gif2', name: 'Celebration Dance', url: 'https://i.giphy.com/l3vRlTKuRxCwpSVQQ.gif' },
-  { id: 'gif3', name: 'Success Goal', url: 'https://i.giphy.com/q7Ow58xLr1Js4.gif' },
-  { id: 'gif4', name: 'Thumbs Up Work', url: 'https://i.giphy.com/1236TCtCO5dsGE.gif' },
-  { id: 'gif5', name: 'High Five Team', url: 'https://i.giphy.com/3oEjHV0zqZuR596caa.gif' },
-  { id: 'gif6', name: 'Celebration Confetti', url: 'https://i.giphy.com/l41YkxvU8c7J7B9a8.gif' },
-  { id: 'gif7', name: 'Minions Happy', url: 'https://i.giphy.com/Is1O1TWVgtg4c.gif' },
-  { id: 'gif8', name: 'Success Yes', url: 'https://i.giphy.com/chzz1FQgqhytWRWbp3.gif' },
-  { id: 'gif9', name: 'Rocket Launch', url: 'https://i.giphy.com/txlxp5iSp6IE8.gif' },
-  { id: 'gif10', name: 'Winner Trophy', url: 'https://i.giphy.com/2s1152aX1xN1S.gif' }
-]
+
 
 const POPULAR_EMOJIS = [
   '😊', '😂', '😍', '👍', '🔥', '🎉', '🚀', '❤️',
@@ -254,7 +243,7 @@ export default function ChatRoomPage() {
 
   // Smileys/stickers selector panel states
   const [showPickerPanel, setShowPickerPanel] = useState(false)
-  const [activePickerTab, setActivePickerTab] = useState<'emoji' | 'gif' | 'sticker'>('emoji')
+  const [activePickerTab, setActivePickerTab] = useState<'emoji' | 'sticker'>('emoji')
 
   // Selected message for deletion modal
   const [selectedDeleteMessage, setSelectedDeleteMessage] = useState<any | null>(null)
@@ -788,10 +777,7 @@ export default function ChatRoomPage() {
     setText((prev) => prev + emoji)
   }
 
-  const sendGif = (gifUrl: string) => {
-    handleSendFileMsg(gifUrl, 'image/gif')
-    setShowPickerPanel(false)
-  }
+
 
   const sendSticker = (stickerUrl: string) => {
     handleSendFileMsg(stickerUrl, 'image/sticker')
@@ -1229,14 +1215,14 @@ export default function ChatRoomPage() {
               >
                 <div className="flex gap-2 border-b border-white/5 pb-2.5 justify-between items-center">
                   <div className="flex gap-1.5">
-                    {(['emoji', 'gif', 'sticker'] as const).map(tab => (
+                    {(['emoji', 'sticker'] as const).map(tab => (
                       <button
                         key={tab}
                         onClick={() => setActivePickerTab(tab)}
                         className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer ${activePickerTab === tab ? 'bg-violet-650 text-white' : 'text-slate-400 hover:text-white'
                           }`}
                       >
-                        {tab === 'emoji' ? '😊 Emojis' : tab === 'gif' ? '🎬 GIFs' : '🎨 Stickers'}
+                        {tab === 'emoji' ? '😊 Emojis' : '🎨 Stickers'}
                       </button>
                     ))}
                   </div>
@@ -1256,20 +1242,6 @@ export default function ChatRoomPage() {
                       >
                         {emoji}
                       </button>
-                    ))}
-                  </div>
-                )}
-
-                {activePickerTab === 'gif' && (
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2.5 max-h-32 overflow-y-auto p-1 scrollbar-hide">
-                    {MOCK_GIF_REACTIONS.map((gif) => (
-                      <img
-                        key={gif.id}
-                        src={gif.url}
-                        alt={gif.name}
-                        onClick={() => sendGif(gif.url)}
-                        className="h-16 w-full object-cover rounded-xl hover:scale-102 cursor-pointer transition border border-white/5"
-                      />
                     ))}
                   </div>
                 )}

@@ -63,6 +63,7 @@ type ExploreActivityPost = {
 }
 
 type MemoryItem = {
+  id?: string
   goalId: string
   goalTitle: string
   imageUrl: string
@@ -607,7 +608,9 @@ export default function ProfilePage() {
 
       const data = await uploadRes.json()
       if (data.url) {
+        const memoryId = `${uploadingForGoalId}-${Date.now()}`
         const newMemory: MemoryItem = {
+          id: memoryId,
           goalId: uploadingForGoalId,
           goalTitle,
           imageUrl: data.url,
@@ -615,8 +618,7 @@ export default function ProfilePage() {
           date: new Date().toLocaleDateString()
         }
         
-        const updatedMemories = memories.filter(m => m.goalId !== uploadingForGoalId)
-        updatedMemories.unshift(newMemory)
+        const updatedMemories = [newMemory, ...memories]
         setMemories(updatedMemories)
         
         if (user) {
@@ -636,13 +638,14 @@ export default function ProfilePage() {
   }
 
   const startEditingCaption = (memory: MemoryItem) => {
-    setEditingMemoryCaptionId(memory.goalId)
+    setEditingMemoryCaptionId(memory.id || memory.goalId)
     setCaptionDraft(memory.caption)
   }
 
-  const saveMemoryCaption = (goalId: string) => {
+  const saveMemoryCaption = (memoryKey: string) => {
     const updated = memories.map(m => {
-      if (m.goalId === goalId) {
+      const key = m.id || m.goalId
+      if (key === memoryKey) {
         return { ...m, caption: captionDraft }
       }
       return m
@@ -654,8 +657,11 @@ export default function ProfilePage() {
     setEditingMemoryCaptionId(null)
   }
 
-  const handleDeleteMemory = (goalId: string) => {
-    const updated = memories.filter(m => m.goalId !== goalId)
+  const handleDeleteMemory = (memoryKey: string) => {
+    const updated = memories.filter(m => {
+      const key = m.id || m.goalId
+      return key !== memoryKey
+    })
     setMemories(updated)
     if (user) {
       localStorage.setItem(`mybuko-memories-${user.id}`, JSON.stringify(updated))
@@ -1211,17 +1217,17 @@ export default function ProfilePage() {
                 <span className={`text-[10px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Polaroid Moments</span>
               </div>
 
-              {/* Upload area for completed goals */}
-              {goals.filter(g => g.status === 'Completed' && !memories.some(m => m.goalId === g.id)).length > 0 && (
+              {/* Upload area for all goals */}
+              {goals.length > 0 && (
                 <div className={`mb-4 border border-dashed rounded-2xl p-4 flex flex-col items-center text-center ${
                   isDark ? 'bg-indigo-950/20 border-indigo-500/30' : 'bg-indigo-50/50 border-indigo-200'
                 }`}>
-                  <UploadCloud className={`w-7 h-7 mb-2 ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
-                  <p className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Capture Completed Dreams</p>
-                  <p className={`text-[10px] mt-1 max-w-[200px] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Select a completed dream to upload a snapshot memory photo.</p>
+                  <UploadCloud className={`w-7 h-7 mb-2 ${isDark ? 'text-indigo-400' : 'text-indigo-650'}`} />
+                  <p className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Capture Goal Memories</p>
+                  <p className={`text-[10px] mt-1 max-w-[200px] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Select a goal to upload a snapshot memory photo.</p>
                   
                   <div className="mt-3 w-full max-h-24 overflow-y-auto space-y-1.5 scrollbar-thin">
-                    {goals.filter(g => g.status === 'Completed' && !memories.some(m => m.goalId === g.id)).map(g => (
+                    {goals.map(g => (
                       <button
                         key={g.id}
                         onClick={() => triggerMemoryUpload(g.id)}
@@ -1253,57 +1259,60 @@ export default function ProfilePage() {
                 }`}>
                   <Camera className="w-8 h-8 text-slate-550 mx-auto mb-2 opacity-50" />
                   <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>No memories cataloged yet.</p>
-                  <p className={`text-[10px] ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Upload memory snapshots for completed dreams.</p>
+                  <p className={`text-[10px] ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Upload memory snapshots for your goals.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  {memories.map((m, idx) => (
-                    <motion.div 
-                      key={m.goalId}
-                      whileHover={{ scale: 1.03, rotate: idx % 2 === 0 ? 1.5 : -1.5 }}
-                      className="bg-white p-3 shadow-lg border border-slate-200 text-slate-800 rounded-lg relative group transition-all"
-                    >
-                      {/* Photo Area */}
-                      <div className="aspect-square bg-slate-100 rounded-sm overflow-hidden relative border border-slate-250">
-                        <img src={m.imageUrl} alt={m.goalTitle} className="h-full w-full object-cover" />
-                        <button
-                          onClick={() => handleDeleteMemory(m.goalId)}
-                          className="absolute top-1.5 right-1.5 p-1 bg-black/60 hover:bg-black text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Delete memory"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-
-                      {/* Handwritten Polaroid Caption */}
-                      <div className="pt-2 text-center text-xs font-semibold font-sans tracking-wide">
-                        <p className="text-[10px] font-black text-slate-400 truncate">{m.goalTitle}</p>
-                        
-                        {editingMemoryCaptionId === m.goalId ? (
-                          <div className="flex items-center gap-1 mt-1">
-                            <input
-                              type="text"
-                              value={captionDraft}
-                              onChange={(e) => setCaptionDraft(e.target.value)}
-                              className="text-[10px] font-medium border border-slate-300 rounded px-1 py-0.5 w-full focus:outline-none"
-                              autoFocus
-                              onBlur={() => saveMemoryCaption(m.goalId)}
-                              onKeyDown={(e) => e.key === 'Enter' && saveMemoryCaption(m.goalId)}
-                            />
-                          </div>
-                        ) : (
-                          <p 
-                            onClick={() => startEditingCaption(m)}
-                            className="mt-1 text-[11px] font-bold text-slate-800 cursor-pointer hover:bg-slate-100 rounded py-0.5 truncate italic"
-                            title="Click to edit caption"
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {memories.map((m, idx) => {
+                    const memoryKey = m.id || m.goalId
+                    return (
+                      <motion.div 
+                        key={memoryKey}
+                        whileHover={{ scale: 1.03, rotate: idx % 2 === 0 ? 1.5 : -1.5 }}
+                        className="bg-white p-3 shadow-lg border border-slate-200 text-slate-800 rounded-lg relative group transition-all w-full max-w-full overflow-hidden"
+                      >
+                        {/* Photo Area */}
+                        <div className="aspect-square bg-slate-100 rounded-sm overflow-hidden relative border border-slate-250 w-full">
+                          <img src={m.imageUrl} alt={m.goalTitle} className="h-full w-full object-cover max-w-full block" />
+                          <button
+                            onClick={() => handleDeleteMemory(memoryKey)}
+                            className="absolute top-1.5 right-1.5 p-1 bg-black/60 hover:bg-black text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Delete memory"
                           >
-                            {m.caption}
-                          </p>
-                        )}
-                        <span className="text-[9px] text-slate-400 font-bold block mt-1">{m.date}</span>
-                      </div>
-                    </motion.div>
-                  ))}
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Handwritten Polaroid Caption */}
+                        <div className="pt-2 text-center text-xs font-semibold font-sans tracking-wide w-full overflow-hidden">
+                          <p className="text-[10px] font-black text-slate-400 truncate w-full">{m.goalTitle}</p>
+                          
+                          {editingMemoryCaptionId === memoryKey ? (
+                            <div className="flex items-center gap-1 mt-1 w-full">
+                              <input
+                                type="text"
+                                value={captionDraft}
+                                onChange={(e) => setCaptionDraft(e.target.value)}
+                                className="text-[10px] font-medium border border-slate-300 rounded px-1 py-0.5 w-full focus:outline-none"
+                                autoFocus
+                                onBlur={() => saveMemoryCaption(memoryKey)}
+                                onKeyDown={(e) => e.key === 'Enter' && saveMemoryCaption(memoryKey)}
+                              />
+                            </div>
+                          ) : (
+                            <p 
+                              onClick={() => startEditingCaption(m)}
+                              className="mt-1 text-[11px] font-bold text-slate-800 cursor-pointer hover:bg-slate-100 rounded py-0.5 truncate italic w-full"
+                              title="Click to edit caption"
+                            >
+                              {m.caption}
+                            </p>
+                          )}
+                          <span className="text-[9px] text-slate-400 font-bold block mt-1">{m.date}</span>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
                 </div>
               )}
             </div>
