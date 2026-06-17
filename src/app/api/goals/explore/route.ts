@@ -32,28 +32,6 @@ export async function GET(request: NextRequest) {
       take: 12
     })
 
-    if (goals.length < 12) {
-      const fallbackGoals = await prisma.goal.findMany({
-        where: {
-          visibility: 'Public',
-          category: { not: 'Personal' }
-        },
-        include: { user: { select: { name: true, email: true } } },
-        orderBy: [
-          { progress: 'desc' },
-          { createdAt: 'desc' }
-        ],
-        take: 24
-      })
-      const merged = [...goals]
-      for (const fg of fallbackGoals) {
-        if (!merged.some(g => g.id === fg.id)) {
-          merged.push(fg)
-        }
-      }
-      goals = merged.slice(0, 12)
-    }
-
     // Sort by filter type
     if (filter === 'trending') {
       goals.sort((a, b) => b.progress - a.progress)
