@@ -22,3 +22,4 @@
 [2026-06-16T18:01:49.614Z] Email: test2@example.com | OTP: 740113 | Purpose: register
 [2026-06-16T18:04:47.878Z] Email: test2@example.com | OTP: 978513 | Purpose: register
 [2026-06-16T18:05:18.854Z] Email: test2@example.com | OTP: 569761 | Purpose: register
+[2026-06-17T16:53:10.504Z] Email: polaroid-test@example.com | OTP: 857204 | Purpose: register

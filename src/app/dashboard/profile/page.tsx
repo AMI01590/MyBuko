@@ -110,6 +110,14 @@ export default function ProfilePage() {
   const [editingMemoryCaptionId, setEditingMemoryCaptionId] = useState<string | null>(null)
   const [captionDraft, setCaptionDraft] = useState('')
 
+  // Add Memory Modal States
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [newMemoryGoalId, setNewMemoryGoalId] = useState('')
+  const [newMemoryCaption, setNewMemoryCaption] = useState('')
+  const [newMemoryFile, setNewMemoryFile] = useState<File | null>(null)
+  const [newMemoryPreview, setNewMemoryPreview] = useState<string>('')
+  const [isUploadingMemory, setIsUploadingMemory] = useState(false)
+
   // Quote state
   const [quoteIdx, setQuoteIdx] = useState(0)
 
@@ -582,58 +590,90 @@ export default function ProfilePage() {
 
   // Memory uploading
   const triggerMemoryUpload = (goalId: string) => {
-    setUploadingForGoalId(goalId)
-    setTimeout(() => {
-      memoryFileInputRef.current?.click()
-    }, 100)
+    setNewMemoryGoalId(goalId)
+    setIsAddModalOpen(true)
   }
 
-  const handleMemoryFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleModalFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (!file || !uploadingForGoalId) return
+    if (file) {
+      setNewMemoryFile(file)
+      const preview = URL.createObjectURL(file)
+      setNewMemoryPreview(preview)
+    }
+  }
 
-    const goal = goals.find(g => g.id === uploadingForGoalId)
+  const resetAddMemoryModal = () => {
+    if (newMemoryPreview) {
+      URL.revokeObjectURL(newMemoryPreview)
+    }
+    setNewMemoryGoalId('')
+    setNewMemoryCaption('')
+    setNewMemoryFile(null)
+    setNewMemoryPreview('')
+    setIsAddModalOpen(false)
+  }
+
+  const handleAddMemorySubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newMemoryPreview || !newMemoryGoalId) {
+      setSaveMessage('Please select a goal and a photo.')
+      setTimeout(() => setSaveMessage(''), 3000)
+      return
+    }
+
+    const goal = goals.find(g => String(g.id) === String(newMemoryGoalId))
     const goalTitle = goal ? goal.title : 'My Bucket Goal'
 
-    setSaveMessage('Uploading photo...')
+    setIsUploadingMemory(true)
+    setSaveMessage('Saving memory...')
     try {
-      const formData = new FormData()
-      formData.append('file', file)
+      let imageUrl = newMemoryPreview
 
-      const uploadRes = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-      if (!uploadRes.ok) throw new Error('Upload failed')
+      if (newMemoryFile) {
+        setSaveMessage('Uploading photo...')
+        const formData = new FormData()
+        formData.append('file', newMemoryFile)
 
-      const data = await uploadRes.json()
-      if (data.url) {
-        const memoryId = `${uploadingForGoalId}-${Date.now()}`
-        const newMemory: MemoryItem = {
-          id: memoryId,
-          goalId: uploadingForGoalId,
-          goalTitle,
-          imageUrl: data.url,
-          caption: 'My memory snapshot!',
-          date: new Date().toLocaleDateString()
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+        if (!uploadRes.ok) throw new Error('Upload failed')
+
+        const data = await uploadRes.json()
+        if (data.url) {
+          imageUrl = data.url
+        } else {
+          throw new Error('Upload failed to return a valid URL')
         }
-        
-        const updatedMemories = [newMemory, ...memories]
-        setMemories(updatedMemories)
-        
-        if (user) {
-          localStorage.setItem(`mybuko-memories-${user.id}`, JSON.stringify(updatedMemories))
-        }
-        setSaveMessage('Memory photo uploaded!')
-        setTimeout(() => setSaveMessage(''), 3000)
       }
+
+      const memoryId = `${newMemoryGoalId}-${Date.now()}`
+      const newMemory: MemoryItem = {
+        id: memoryId,
+        goalId: newMemoryGoalId,
+        goalTitle,
+        imageUrl,
+        caption: newMemoryCaption.trim() || 'My memory snapshot!',
+        date: new Date().toLocaleDateString()
+      }
+      
+      const updatedMemories = [newMemory, ...memories]
+      setMemories(updatedMemories)
+      
+      if (user) {
+        localStorage.setItem(`mybuko-memories-${user.id}`, JSON.stringify(updatedMemories))
+      }
+      setSaveMessage('Memory snapshot saved!')
+      setTimeout(() => setSaveMessage(''), 3000)
+      resetAddMemoryModal()
     } catch (err) {
       console.error(err)
-      setSaveMessage('Upload failed')
+      setSaveMessage('Saving failed')
       setTimeout(() => setSaveMessage(''), 3000)
     } finally {
-      setUploadingForGoalId(null)
-      if (memoryFileInputRef.current) memoryFileInputRef.current.value = ''
+      setIsUploadingMemory(false)
     }
   }
 
@@ -1209,74 +1249,56 @@ export default function ProfilePage() {
             <div className={`rounded-3xl border p-4 sm:p-6 ${
               isDark ? 'bg-slate-900/40 border-white/5 backdrop-blur-xl' : 'bg-white border-slate-200/80 shadow-md'
             }`}>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <h3 className="text-base font-bold font-display flex items-center gap-2">
                   <Camera className="w-5 h-5 text-indigo-500" />
                   Memory Gallery
                 </h3>
-                <span className={`text-[10px] font-semibold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Polaroid Moments</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (goals.length > 0) {
+                      setNewMemoryGoalId(goals[0].id)
+                    }
+                    setIsAddModalOpen(true)
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-300 hover:scale-105 ${
+                    isDark 
+                      ? 'bg-indigo-500/10 text-indigo-305 border border-indigo-500/25 hover:bg-indigo-500/20' 
+                      : 'bg-indigo-50 text-indigo-755 border border-indigo-200 hover:bg-indigo-100'
+                  }`}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Moment</span>
+                </button>
               </div>
 
-              {/* Upload area for all goals */}
-              {goals.length > 0 && (
-                <div className={`mb-4 border border-dashed rounded-2xl p-4 flex flex-col items-center text-center ${
-                  isDark ? 'bg-indigo-950/20 border-indigo-500/30' : 'bg-indigo-50/50 border-indigo-200'
-                }`}>
-                  <UploadCloud className={`w-7 h-7 mb-2 ${isDark ? 'text-indigo-400' : 'text-indigo-650'}`} />
-                  <p className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Capture Goal Memories</p>
-                  <p className={`text-[10px] mt-1 max-w-[200px] leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Select a goal to upload a snapshot memory photo.</p>
-                  
-                  <div className="mt-3 w-full max-h-24 overflow-y-auto space-y-1.5 scrollbar-thin">
-                    {goals.map(g => (
-                      <button
-                        key={g.id}
-                        onClick={() => triggerMemoryUpload(g.id)}
-                        className={`w-full text-left text-[11px] font-bold py-1.5 px-3.5 rounded-lg border transition-all flex items-center justify-between ${
-                          isDark 
-                            ? 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/20' 
-                            : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-750 border-indigo-200'
-                        }`}
-                      >
-                        <span className="truncate">{g.title}</span>
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    ref={memoryFileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleMemoryFileChange}
-                    className="hidden"
-                  />
-                </div>
-              )}
-
-              {/* Memory List Carousel / Grid */}
+              {/* Memory List Grid */}
               {memories.length === 0 ? (
-                <div className={`text-center py-8 border rounded-2xl ${
-                  isDark ? 'bg-slate-950/20 border-white/5' : 'bg-slate-100/50 border-slate-200'
+                <div className={`text-center py-10 border border-dashed rounded-2xl ${
+                  isDark ? 'bg-slate-950/20 border-white/5' : 'bg-slate-100/50 border-slate-205'
                 }`}>
-                  <Camera className="w-8 h-8 text-slate-550 mx-auto mb-2 opacity-50" />
-                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>No memories cataloged yet.</p>
-                  <p className={`text-[10px] ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Upload memory snapshots for your goals.</p>
+                  <Camera className="w-8 h-8 text-slate-550 mx-auto mb-2 opacity-50 animate-pulse" />
+                  <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-655'}`}>No memories cataloged yet.</p>
+                  <p className={`text-[10px] mt-1 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Click "Add Moment" to pin Polaroid snapshot memories for your goals.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6 justify-items-center">
                   {memories.map((m, idx) => {
                     const memoryKey = m.id || m.goalId
                     return (
                       <motion.div 
                         key={memoryKey}
-                        whileHover={{ scale: 1.03, rotate: idx % 2 === 0 ? 1.5 : -1.5 }}
-                        className="bg-white p-3 shadow-lg border border-slate-200 text-slate-800 rounded-lg relative group transition-all w-full max-w-full overflow-hidden"
+                        whileHover={{ scale: 1.04, rotate: idx % 2 === 0 ? 1.5 : -1.5 }}
+                        className="bg-white p-3.5 pb-6 shadow-xl border border-slate-200 text-slate-800 rounded-md relative group transition-all w-full max-w-[280px] overflow-hidden flex flex-col justify-between"
+                        style={{ transform: `rotate(${(idx % 3 - 1) * 1.2}deg)` }}
                       >
                         {/* Photo Area */}
-                        <div className="aspect-square bg-slate-100 rounded-sm overflow-hidden relative border border-slate-250 w-full">
+                        <div className="aspect-square bg-slate-100 rounded-sm overflow-hidden relative border border-slate-200 w-full flex-shrink-0">
                           <img src={m.imageUrl} alt={m.goalTitle} className="h-full w-full object-cover max-w-full block" />
                           <button
                             onClick={() => handleDeleteMemory(memoryKey)}
-                            className="absolute top-1.5 right-1.5 p-1 bg-black/60 hover:bg-black text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-1.5 right-1.5 p-1 bg-black/60 hover:bg-rose-650 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                             title="Delete memory"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1284,16 +1306,16 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Handwritten Polaroid Caption */}
-                        <div className="pt-2 text-center text-xs font-semibold font-sans tracking-wide w-full overflow-hidden">
-                          <p className="text-[10px] font-black text-slate-400 truncate w-full">{m.goalTitle}</p>
+                        <div className="pt-3.5 text-center w-full overflow-hidden flex flex-col items-center">
+                          <p className="text-[9px] font-black text-slate-405 uppercase tracking-widest truncate w-full mb-1">{m.goalTitle}</p>
                           
                           {editingMemoryCaptionId === memoryKey ? (
-                            <div className="flex items-center gap-1 mt-1 w-full">
+                            <div className="flex items-center gap-1 w-full px-1">
                               <input
                                 type="text"
                                 value={captionDraft}
                                 onChange={(e) => setCaptionDraft(e.target.value)}
-                                className="text-[10px] font-medium border border-slate-300 rounded px-1 py-0.5 w-full focus:outline-none"
+                                className="text-[10px] font-medium border border-slate-300 rounded px-1.5 py-0.5 w-full focus:outline-none text-center"
                                 autoFocus
                                 onBlur={() => saveMemoryCaption(memoryKey)}
                                 onKeyDown={(e) => e.key === 'Enter' && saveMemoryCaption(memoryKey)}
@@ -1302,13 +1324,13 @@ export default function ProfilePage() {
                           ) : (
                             <p 
                               onClick={() => startEditingCaption(m)}
-                              className="mt-1 text-[11px] font-bold text-slate-800 cursor-pointer hover:bg-slate-100 rounded py-0.5 truncate italic w-full"
+                              className="text-xs font-bold text-slate-800 cursor-pointer hover:bg-slate-100 rounded px-1.5 py-0.5 truncate italic w-full font-serif text-center"
                               title="Click to edit caption"
                             >
-                              {m.caption}
+                              "{m.caption}"
                             </p>
                           )}
-                          <span className="text-[9px] text-slate-400 font-bold block mt-1">{m.date}</span>
+                          <span className="text-[8px] text-slate-450 font-bold block mt-2.5 tracking-wider">{m.date}</span>
                         </div>
                       </motion.div>
                     )
@@ -1881,6 +1903,220 @@ export default function ProfilePage() {
         </div>
 
       </div>
+
+      {/* Add Memory Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+          <div className={`w-full max-w-md rounded-[32px] overflow-hidden border shadow-2xl transition-all ${isDark ? 'bg-slate-950 border-white/10 text-slate-200' : 'bg-white border-gray-200 text-gray-900'}`}>
+            
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-opacity-50 dark:border-white/5 border-gray-200">
+              <h3 className="text-lg font-bold capitalize font-display">Capture a Polaroid Moment</h3>
+              <button
+                type="button"
+                onClick={resetAddMemoryModal}
+                className={`p-2 rounded-full transition-all ${isDark ? 'hover:bg-slate-800' : 'hover:bg-gray-100'}`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              {goals.length === 0 ? (
+                <div className="text-center py-6">
+                  <Compass className="w-12 h-12 text-slate-500 mx-auto mb-2 opacity-55 animate-bounce-slow" />
+                  <p className="text-sm font-bold">No Goals Found</p>
+                  <p className="text-xs text-slate-500 mt-1 max-w-[240px] mx-auto">You need to have at least one goal in your list before you can add memory moments.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetAddMemoryModal()
+                      router.push('/dashboard')
+                    }}
+                    className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-indigo-650 text-white rounded-full text-xs font-black uppercase tracking-wider hover:bg-indigo-755 transition-all"
+                  >
+                    Go to Dashboard
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleAddMemorySubmit} className="space-y-4">
+                  {/* Select Goal */}
+                  <div>
+                    <label className={`block text-[10px] font-black uppercase tracking-wider mb-1.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      Select Associated Goal
+                    </label>
+                    <select
+                      value={newMemoryGoalId}
+                      onChange={(e) => setNewMemoryGoalId(e.target.value)}
+                      required
+                      className={`w-full rounded-2xl border px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all ${
+                        isDark ? 'bg-slate-900 border-white/10 text-slate-100' : 'bg-slate-50 border-slate-205 text-slate-850'
+                      }`}
+                    >
+                      <option value="" disabled>-- Choose a Goal --</option>
+                      {goals.map(g => (
+                        <option key={g.id} value={g.id}>{g.title}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Polaroid Caption */}
+                  <div>
+                    <label className={`block text-[10px] font-black uppercase tracking-wider mb-1.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      Polaroid Caption
+                    </label>
+                    <input
+                      type="text"
+                      value={newMemoryCaption}
+                      onChange={(e) => setNewMemoryCaption(e.target.value)}
+                      placeholder="Write a custom memory caption..."
+                      required
+                      className={`w-full rounded-2xl border px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all ${
+                        isDark ? 'bg-slate-900 border-white/10 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'
+                      }`}
+                    />
+                      {/* File Input & Preset Selector */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className={`block text-[10px] font-black uppercase tracking-wider ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        Photo Source
+                      </label>
+                      {newMemoryPreview && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (newMemoryPreview.startsWith('blob:')) {
+                              URL.revokeObjectURL(newMemoryPreview)
+                            }
+                            setNewMemoryFile(null)
+                            setNewMemoryPreview('')
+                          }}
+                          className="text-[9px] font-extrabold text-rose-500 hover:underline"
+                        >
+                          Clear Selection
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleModalFileChange}
+                        className="hidden"
+                        id="modal-memory-file-input"
+                      />
+                      <label
+                        htmlFor="modal-memory-file-input"
+                        className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-5 cursor-pointer transition-all ${
+                          newMemoryPreview && newMemoryFile
+                            ? 'border-indigo-500/55 bg-indigo-500/5' 
+                            : isDark 
+                              ? 'border-white/10 bg-slate-900/20 hover:bg-slate-900/40 hover:border-white/20' 
+                              : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'
+                        }`}
+                      >
+                        {newMemoryPreview && newMemoryFile ? (
+                          <div className="text-center">
+                            <span className="text-xs font-bold text-emerald-500 flex items-center justify-center gap-1">
+                              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" /> File Selected
+                            </span>
+                            <span className="text-[10px] text-slate-500 mt-1 block max-w-[200px] truncate">{newMemoryFile.name}</span>
+                          </div>
+                        ) : (
+                          <>
+                            <UploadCloud className={`w-7 h-7 mb-2.5 ${isDark ? 'text-indigo-400' : 'text-indigo-650'}`} />
+                            <span className={`text-xs font-bold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Upload custom photo</span>
+                          </>
+                        )}
+                      </label>
+
+                      {/* Presets Grid */}
+                      <div>
+                        <p className={`text-[9px] font-bold mb-2 ${isDark ? 'text-slate-400' : 'text-slate-550'}`}>Or select a beautiful preset:</p>
+                        <div className="grid grid-cols-5 gap-2">
+                          {[
+                            { name: 'Mountain', url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop' },
+                            { name: 'Beach', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop' },
+                            { name: 'Desert', url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&auto=format&fit=crop' },
+                            { name: 'Aurora', url: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=600&auto=format&fit=crop' },
+                            { name: 'Lake', url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&auto=format&fit=crop' }
+                          ].map((preset) => {
+                            const isSelected = newMemoryPreview === preset.url
+                            return (
+                              <button
+                                key={preset.name}
+                                type="button"
+                                onClick={() => {
+                                  if (newMemoryPreview && newMemoryPreview.startsWith('blob:')) {
+                                    URL.revokeObjectURL(newMemoryPreview)
+                                  }
+                                  setNewMemoryFile(null)
+                                  setNewMemoryPreview(preset.url)
+                                  if (!newMemoryCaption) {
+                                    setNewMemoryCaption(preset.name + ' memory!')
+                                  }
+                                }}
+                                className={`aspect-square rounded-xl overflow-hidden relative border-2 transition-all ${
+                                  isSelected 
+                                    ? 'border-indigo-500 scale-105 shadow-md' 
+                                    : 'border-transparent hover:scale-105 opacity-70 hover:opacity-100'
+                                }`}
+                                title={preset.name}
+                              >
+                                <img src={preset.url} alt={preset.name} className="h-full w-full object-cover" />
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Polaroid Live Preview frame */}
+                  {newMemoryPreview && (
+                    <div className="pt-2 border-t dark:border-white/5 border-slate-100 flex flex-col items-center">
+                      <p className={`text-[9px] font-bold mb-2.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Live Preview:</p>
+                      <div className="bg-white p-3 pb-5 shadow-lg border border-slate-200 text-slate-800 rounded mx-auto w-full max-w-[170px] pointer-events-none mb-3 transform rotate-1">
+                        <div className="aspect-square bg-slate-50 rounded-sm overflow-hidden relative border border-slate-200 w-full">
+                          <img src={newMemoryPreview} alt="Polaroid preview" className="h-full w-full object-cover" />
+                        </div>
+                        <div className="pt-2.5 text-center text-[10px] font-sans font-bold italic truncate max-w-[150px] font-serif">
+                          "{newMemoryCaption.trim() || 'Polaroid Moment'}"
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={resetAddMemoryModal}
+                      className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-5 py-2.5 text-xs font-black uppercase tracking-wider border transition-all duration-300 ${
+                        isDark 
+                          ? 'bg-slate-900 border-white/5 text-slate-300 hover:bg-slate-800' 
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100 shadow-sm'
+                      }`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isUploadingMemory}
+                      className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-full px-5 py-2.5 text-xs font-black uppercase tracking-wider transition-all duration-300 bg-gradient-to-r from-indigo-600 to-cyan-600 text-white hover:opacity-95 shadow-md shadow-indigo-600/15 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {isUploadingMemory ? 'Uploading...' : 'Save Moment'}
+                    </button>
+                  </div>                  </div>
+                </form>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* Followers / Following Modals */}
       {showModal && (
